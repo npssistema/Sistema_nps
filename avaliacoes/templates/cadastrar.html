@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Avaliação</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            border: 1px solid #cfcfcf;
+            border-radius: 4px;
+        }
+
+        .linha3, .linha2 {
+            display: flex;
+            gap: 20px;
+        }
+
+        .linha3 div, .linha2 div {
+            flex: 1;
+        }
+
+        .pergunta {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .notas input {
+            display: none;
+        }
+
+        .notas label {
+            display: inline-block;
+            border: 1px solid #bfbfbf;
+            padding: 6px 10px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .notas input:checked + label {
+            background: #1f3c88;
+            color: white;
+        }
+
+        .btn-salvar {
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background: #28a745;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+
+        .btn-voltar {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    Cadastro de Avaliação da Manutenção
+</div>
+
+<div class="container">
+
+<h2>Nova Avaliação</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<label>Nº da OS de Manutenção</label>
+<input type="text" name="os_numero" required>
+
+<div class="linha3">
+    <div><label>Equipamento</label><input type="text" name="equipamento" required></div>
+    <div><label>Marca</label><input type="text" name="marca" required></div>
+    <div><label>Modelo</label><input type="text" name="modelo" required></div>
+</div>
+
+<div class="linha2">
+    <div><label>Localização</label><input type="text" name="localizacao" required></div>
+    <div><label>Órgão</label><input type="text" name="orgao" required></div>
+</div>
+
+<label>Data</label>
+<input type="date" name="data" required>
+
+<!-- Q1 -->
+<div class="pergunta">1. Como você avalia o serviço do conserto realizado nesta OS?</div>
+<div class="notas">
+    <input type="radio" id="q1_1" name="q1" value="1" required><label for="q1_1">1</label>
+    <input type="radio" id="q1_2" name="q1" value="2"><label for="q1_2">2</label>
+    <input type="radio" id="q1_3" name="q1" value="3"><label for="q1_3">3</label>
+    <input type="radio" id="q1_4" name="q1" value="4"><label for="q1_4">4</label>
+    <input type="radio" id="q1_5" name="q1" value="5"><label for="q1_5">5</label>
+</div>
+
+<!-- Q2 -->
+<div class="pergunta">2. Como você avalia o técnico (postura, educação e clareza) que realizou o serviço?</div>
+<div class="notas">
+    <input type="radio" id="q2_1" name="q2" value="1" required><label for="q2_1">1</label>
+    <input type="radio" id="q2_2" name="q2" value="2"><label for="q2_2">2</label>
+    <input type="radio" id="q2_3" name="q2" value="3"><label for="q2_3">3</label>
+    <input type="radio" id="q2_4" name="q2" value="4"><label for="q2_4">4</label>
+    <input type="radio" id="q2_5" name="q2" value="5"><label for="q2_5">5</label>
+</div>
+
+<!-- Q3 -->
+<div class="pergunta">3. No geral, como você avalia o suporte e o atendimento do setor de Engenharia Clínica?</div>
+<div class="notas">
+    <input type="radio" id="q3_1" name="q3" value="1" required><label for="q3_1">1</label>
+    <input type="radio" id="q3_2" name="q3" value="2"><label for="q3_2">2</label>
+    <input type="radio" id="q3_3" name="q3" value="3"><label for="q3_3">3</label>
+    <input type="radio" id="q3_4" name="q3" value="4"><label for="q3_4">4</label>
+    <input type="radio" id="q3_5" name="q3" value="5"><label for="q3_5">5</label>
+</div>
+
+<label>Comentário/ Sugestão</label>
+<textarea name="comentario"></textarea>
+
+<label>Registrado por</label>
+<input type="text" name="registrado_por" required>
+
+<button class="btn-salvar">Salvar</button>
+
+</form>
+
+<a href="/" class="btn-voltar">Voltar</a>
+
+</div>
+
+</body>
+</html>

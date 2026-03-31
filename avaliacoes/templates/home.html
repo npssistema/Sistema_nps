@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Avaliação de Manutenção</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            display: block;
+            width: 70%;
+            margin: 20px auto;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: pointer;
+            color: #1f3c88;
+            font-weight: bold;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: auto;
+            background-color: #1f3c88;
+            color: #fff;
+            text-align: left;
+            padding: 8px;
+            border-radius: 6px;
+
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+
+            opacity: 0;
+            transition: opacity 0.3s;
+
+            font-size: 13px;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .btn-cadastrar {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-historico {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-graficos {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .footer {
+            margin-top: 50px;
+            color: #777;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Sistema de Avaliação da Manutenção Corretiva
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Bem-vindo</h2>
+            <p>Escolha uma das opções abaixo:</p>
+
+            <a href="/cadastrar/" class="btn btn-cadastrar">
+                ➕ Cadastrar Nova Resposta
+            </a>
+
+            <a href="/historico/" class="btn btn-historico">
+                📄 Histórico de Respostas
+            </a>
+
+            <a href="/graficos/" class="btn btn-graficos">
+                📊 Análises e Gráficos
+            </a>
+        </div>
+<div class="footer">
+    Sistema de apoio à avaliação da manutenção hospitalar <br>
+    Criado por
+    <span class="tooltip">
+        Patrick Carneiro
+        <span class="tooltip-text">
+            📧 patrick.pc.2571@gmail.com<br>
+            🔗 linkedin.com/in/patrickcarneiro
+        </span>
+    </span>,
+    <span class="tooltip">
+        João Vitor Guimarães
+        <span class="tooltip-text">
+            🔗 http://linkedin.com/in/joaovitorguimaraes1603
+        </span>
+    </span>
+    e
+    <span class="tooltip">
+        Júlia Miranda
+        <span class="tooltip-text">
+            🔗 http://linkedin.com/in/juliamirandab
+        </span>
+    </span>
+</div>
+
+
+</body>
+</html>
