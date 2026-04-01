@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Avaliação de Manutenção</title>
 
     <style>
@@ -24,6 +25,7 @@
             max-width: 900px;
             margin: 50px auto;
             text-align: center;
+            padding: 0 15px;
         }
 
         .card {
@@ -61,17 +63,15 @@
             text-align: left;
             padding: 8px;
             border-radius: 6px;
-
             position: absolute;
             z-index: 1;
             bottom: 125%;
             left: 50%;
             transform: translateX(-50%);
-
             opacity: 0;
             transition: opacity 0.3s;
-
             font-size: 13px;
+            white-space: nowrap;
         }
 
         .tooltip:hover .tooltip-text {
@@ -102,6 +102,23 @@
             margin-top: 50px;
             color: #777;
             font-size: 14px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 700px) {
+            .card {
+                padding: 25px;
+            }
+
+            .btn {
+                width: 100%;
+                font-size: 16px;
+            }
+
+            .header {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -117,43 +134,44 @@
             <h2>Bem-vindo</h2>
             <p>Escolha uma das opções abaixo:</p>
 
-            <a href="/cadastrar/" class="btn btn-cadastrar">
+            <a href="cadastrar.html" class="btn btn-cadastrar">
                 ➕ Cadastrar Nova Resposta
             </a>
 
-            <a href="/historico/" class="btn btn-historico">
+            <a href="historico.html" class="btn btn-historico">
                 📄 Histórico de Respostas
             </a>
 
-            <a href="/graficos/" class="btn btn-graficos">
+            <a href="graficos.html" class="btn btn-graficos">
                 📊 Análises e Gráficos
             </a>
         </div>
-<div class="footer">
-    Sistema de apoio à avaliação da manutenção hospitalar <br>
-    Criado por
-    <span class="tooltip">
-        Patrick Carneiro
-        <span class="tooltip-text">
-            📧 patrick.pc.2571@gmail.com<br>
-            🔗 linkedin.com/in/patrickcarneiro
-        </span>
-    </span>,
-    <span class="tooltip">
-        João Vitor Guimarães
-        <span class="tooltip-text">
-            🔗 http://linkedin.com/in/joaovitorguimaraes1603
-        </span>
-    </span>
-    e
-    <span class="tooltip">
-        Júlia Miranda
-        <span class="tooltip-text">
-            🔗 http://linkedin.com/in/juliamirandab
-        </span>
-    </span>
-</div>
 
+        <div class="footer">
+            Sistema de apoio à avaliação da manutenção hospitalar <br>
+            Criado por
+            <span class="tooltip">
+                Patrick Carneiro
+                <span class="tooltip-text">
+                    📧 patrick.pc.2571@gmail.com<br>
+                    🔗 linkedin.com/in/patrickcarneiro
+                </span>
+            </span>,
+            <span class="tooltip">
+                João Vitor Guimarães
+                <span class="tooltip-text">
+                    🔗 linkedin.com/in/joaovitorguimaraes1603
+                </span>
+            </span>
+            e
+            <span class="tooltip">
+                Júlia Miranda
+                <span class="tooltip-text">
+                    🔗 linkedin.com/in/juliamirandab
+                </span>
+            </span>
+        </div>
+    </div>
 
 </body>
 </html>
