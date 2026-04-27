@@ -32,7 +32,7 @@
             box-shadow: 0 0 12px rgba(0,0,0,0.1);
         }
 
-        /* 🔥 TOPO COM BOTÃO */
+        /* 🔥 TOPO */
         .topo-form {
             display: flex;
             justify-content: space-between;
@@ -44,9 +44,10 @@
             margin: 0;
         }
 
+        /* 🔥 BOTÃO CINZA */
         .btn-imprimir {
             padding: 10px 14px;
-            background: #dc3545;
+            background: #6c757d;
             color: white;
             font-weight: bold;
             border: none;
@@ -56,7 +57,7 @@
         }
 
         .btn-imprimir:hover {
-            opacity: 0.9;
+            background: #5a6268;
         }
 
         label {
@@ -150,46 +151,6 @@
             font-weight: bold;
         }
 
-        .mensagem {
-            margin-top: 18px;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .mensagem.sucesso {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .mensagem.erro {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* 🔥 PRINT LIMPO */
-        @media print {
-            .btn-salvar,
-            .btn-imprimir,
-            .btn-voltar,
-            .mensagem {
-                display: none !important;
-            }
-
-            body {
-                background: white;
-            }
-
-            .container {
-                box-shadow: none;
-                margin: 0;
-                width: 100%;
-            }
-        }
-
         @media (max-width: 700px) {
             .linha3,
             .linha2 {
@@ -210,62 +171,62 @@
     <!-- 🔥 TOPO COM BOTÃO -->
     <div class="topo-form">
         <h2>Nova Avaliação</h2>
-        <button onclick="imprimirFormulario()" class="btn-imprimir">
-            🖨 Imprimir
+        <button onclick="imprimirPDF()" class="btn-imprimir">
+            Imprimir formulário
         </button>
     </div>
 
-    <form id="form-avaliacao">
+    <form>
 
         <label>Nº da OS</label>
-        <input type="text" id="os_numero" required>
+        <input type="text">
 
         <div class="linha3">
-            <div><label>Equipamento</label><input type="text" id="equipamento"></div>
-            <div><label>Marca</label><input type="text" id="marca"></div>
-            <div><label>Modelo</label><input type="text" id="modelo"></div>
+            <div><label>Equipamento</label><input type="text"></div>
+            <div><label>Marca</label><input type="text"></div>
+            <div><label>Modelo</label><input type="text"></div>
         </div>
 
         <div class="linha2">
-            <div><label>Localização</label><input type="text" id="localizacao"></div>
-            <div><label>Órgão</label><input type="text" id="orgao"></div>
+            <div><label>Localização</label><input type="text"></div>
+            <div><label>Órgão</label><input type="text"></div>
         </div>
 
         <label>Data</label>
-        <input type="date" id="data">
+        <input type="date">
 
         <div class="pergunta">1. Avaliação do serviço</div>
         <div class="notas">
-            <input type="radio" name="q1" value="1"><label>1</label>
-            <input type="radio" name="q1" value="2"><label>2</label>
-            <input type="radio" name="q1" value="3"><label>3</label>
-            <input type="radio" name="q1" value="4"><label>4</label>
-            <input type="radio" name="q1" value="5"><label>5</label>
+            <input type="radio" name="q1"><label>1</label>
+            <input type="radio" name="q1"><label>2</label>
+            <input type="radio" name="q1"><label>3</label>
+            <input type="radio" name="q1"><label>4</label>
+            <input type="radio" name="q1"><label>5</label>
         </div>
 
         <div class="pergunta">2. Avaliação do técnico</div>
         <div class="notas">
-            <input type="radio" name="q2" value="1"><label>1</label>
-            <input type="radio" name="q2" value="2"><label>2</label>
-            <input type="radio" name="q2" value="3"><label>3</label>
-            <input type="radio" name="q2" value="4"><label>4</label>
-            <input type="radio" name="q2" value="5"><label>5</label>
+            <input type="radio" name="q2"><label>1</label>
+            <input type="radio" name="q2"><label>2</label>
+            <input type="radio" name="q2"><label>3</label>
+            <input type="radio" name="q2"><label>4</label>
+            <input type="radio" name="q2"><label>5</label>
         </div>
 
         <div class="pergunta">3. Avaliação geral</div>
         <div class="notas">
-            <input type="radio" name="q3" value="1"><label>1</label>
-            <input type="radio" name="q3" value="2"><label>2</label>
-            <input type="radio" name="q3" value="3"><label>3</label>
-            <input type="radio" name="q3" value="4"><label>4</label>
-            <input type="radio" name="q3" value="5"><label>5</label>
+            <input type="radio" name="q3"><label>1</label>
+            <input type="radio" name="q3"><label>2</label>
+            <input type="radio" name="q3"><label>3</label>
+            <input type="radio" name="q3"><label>4</label>
+            <input type="radio" name="q3"><label>5</label>
         </div>
 
         <label>Comentário</label>
-        <textarea id="comentario"></textarea>
+        <textarea></textarea>
 
         <label>Registrado por</label>
-        <input type="text" id="registrado_por">
+        <input type="text">
 
         <button class="btn-salvar">Salvar</button>
 
@@ -276,8 +237,8 @@
 </div>
 
 <script>
-function imprimirFormulario() {
-    window.print();
+function imprimirPDF() {
+    window.open("FORMULARIO DE SATISFAÇÃO - ENGENHARIA CLÍNICA.pdf", "_blank");
 }
 </script>
 
