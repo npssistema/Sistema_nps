@@ -1,188 +1,243 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cadastro de Avaliação</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Avaliação</title>
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f2f4f8;
-    margin: 0;
-}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 0;
+        }
 
-.header {
-    background: #1f3c88;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-weight: bold;
-}
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
 
-.container {
-    width: 700px;
-    max-width: calc(100% - 30px);
-    margin: 30px auto;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-}
+        .container {
+            width: 700px;
+            max-width: calc(100% - 30px);
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
 
-.topo-form {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .topo-form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
-.btn-imprimir {
-    background: #6c757d;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
+        h2 {
+            margin: 0;
+        }
 
-label {
-    font-weight: bold;
-    display: block;
-    margin-top: 15px;
-}
+        .btn-imprimir {
+            padding: 10px 14px;
+            background: #6c757d;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
 
-input, textarea {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-}
+        .btn-imprimir:hover {
+            background: #5a6268;
+        }
 
-.linha3, .linha2 {
-    display: flex;
-    gap: 10px;
-}
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            font-size: 13px;
+        }
 
-.linha3 div, .linha2 div {
-    flex: 1;
-}
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            border: 1px solid #cfcfcf;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
 
-.pergunta {
-    margin-top: 20px;
-    font-weight: bold;
-}
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
 
-.notas input {
-    display: none;
-}
+        .linha3,
+        .linha2 {
+            display: flex;
+            gap: 20px;
+        }
 
-.notas label {
-    display: inline-block;
-    border: 1px solid #ccc;
-    padding: 6px 10px;
-    margin: 3px;
-    cursor: pointer;
-}
+        .linha3 div,
+        .linha2 div {
+            flex: 1;
+        }
 
-.notas input:checked + label {
-    background: #1f3c88;
-    color: white;
-}
+        .pergunta {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
 
-.btn-salvar {
-    margin-top: 20px;
-    padding: 12px;
-    background: #007bff;
-    color: white;
-    border: none;
-    width: 100%;
-}
+        .notas {
+            margin-top: 8px;
+        }
 
-.btn-voltar {
-    display: block;
-    margin-top: 15px;
-    text-align: center;
-    background: #28a745;
-    color: white;
-    padding: 10px;
-    text-decoration: none;
-}
-</style>
+        .notas input {
+            display: none;
+        }
+
+        .notas label {
+            display: inline-block;
+            border: 1px solid #bfbfbf;
+            padding: 6px 10px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notas input:checked + label {
+            background: #1f3c88;
+            color: white;
+            border-color: #1f3c88;
+        }
+
+        .btn-salvar {
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-voltar {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            padding: 12px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+            .linha3,
+            .linha2 {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .container {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="header">
-Cadastro de Avaliação da Manutenção
+    Cadastro de Avaliação da Manutenção
 </div>
 
 <div class="container">
 
-<div class="topo-form">
-<h2>Nova Avaliação</h2>
-<button onclick="imprimirPDF()" class="btn-imprimir">
-Imprimir Formulário
-</button>
-</div>
+    <div class="topo-form">
+        <h2>Nova Avaliação</h2>
+        <button onclick="imprimirPDF()" class="btn-imprimir">
+            Imprimir Formulário
+        </button>
+    </div>
 
-<form>
+    <form>
 
-<label>Nº da OS</label>
-<input type="text">
+        <label>Nº da OS</label>
+        <input type="text">
 
-<div class="linha3">
-<div><label>Equipamento</label><input type="text"></div>
-<div><label>Marca</label><input type="text"></div>
-<div><label>Modelo</label><input type="text"></div>
-</div>
+        <div class="linha3">
+            <div><label>Equipamento</label><input type="text"></div>
+            <div><label>Marca</label><input type="text"></div>
+            <div><label>Modelo</label><input type="text"></div>
+        </div>
 
-<div class="linha2">
-<div><label>Localização</label><input type="text"></div>
-<div><label>Órgão</label><input type="text"></div>
-</div>
+        <div class="linha2">
+            <div><label>Localização</label><input type="text"></div>
+            <div><label>Órgão</label><input type="text"></div>
+        </div>
 
-<label>Data</label>
-<input type="date">
+        <label>Data</label>
+        <input type="date">
 
-<!-- Q1 -->
-<div class="pergunta">1. Avaliação do serviço</div>
-<div class="notas">
-<input type="radio" id="q1_1" name="q1" value="1"><label for="q1_1">1</label>
-<input type="radio" id="q1_2" name="q1" value="2"><label for="q1_2">2</label>
-<input type="radio" id="q1_3" name="q1" value="3"><label for="q1_3">3</label>
-<input type="radio" id="q1_4" name="q1" value="4"><label for="q1_4">4</label>
-<input type="radio" id="q1_5" name="q1" value="5"><label for="q1_5">5</label>
-</div>
+        <!-- Q1 -->
+        <div class="pergunta">1. Avaliação do serviço</div>
+        <div class="notas">
+            <input type="radio" id="q1_1" name="q1" value="1"><label for="q1_1">1</label>
+            <input type="radio" id="q1_2" name="q1" value="2"><label for="q1_2">2</label>
+            <input type="radio" id="q1_3" name="q1" value="3"><label for="q1_3">3</label>
+            <input type="radio" id="q1_4" name="q1" value="4"><label for="q1_4">4</label>
+            <input type="radio" id="q1_5" name="q1" value="5"><label for="q1_5">5</label>
+        </div>
 
-<!-- Q2 -->
-<div class="pergunta">2. Avaliação do técnico</div>
-<div class="notas">
-<input type="radio" id="q2_1" name="q2" value="1"><label for="q2_1">1</label>
-<input type="radio" id="q2_2" name="q2" value="2"><label for="q2_2">2</label>
-<input type="radio" id="q2_3" name="q2" value="3"><label for="q2_3">3</label>
-<input type="radio" id="q2_4" name="q2" value="4"><label for="q2_4">4</label>
-<input type="radio" id="q2_5" name="q2" value="5"><label for="q2_5">5</label>
-</div>
+        <!-- Q2 -->
+        <div class="pergunta">2. Avaliação do técnico</div>
+        <div class="notas">
+            <input type="radio" id="q2_1" name="q2" value="1"><label for="q2_1">1</label>
+            <input type="radio" id="q2_2" name="q2" value="2"><label for="q2_2">2</label>
+            <input type="radio" id="q2_3" name="q2" value="3"><label for="q2_3">3</label>
+            <input type="radio" id="q2_4" name="q2" value="4"><label for="q2_4">4</label>
+            <input type="radio" id="q2_5" name="q2" value="5"><label for="q2_5">5</label>
+        </div>
 
-<!-- Q3 -->
-<div class="pergunta">3. Avaliação geral</div>
-<div class="notas">
-<input type="radio" id="q3_1" name="q3" value="1"><label for="q3_1">1</label>
-<input type="radio" id="q3_2" name="q3" value="2"><label for="q3_2">2</label>
-<input type="radio" id="q3_3" name="q3" value="3"><label for="q3_3">3</label>
-<input type="radio" id="q3_4" name="q3" value="4"><label for="q3_4">4</label>
-<input type="radio" id="q3_5" name="q3" value="5"><label for="q3_5">5</label>
-</div>
+        <!-- Q3 -->
+        <div class="pergunta">3. Avaliação geral</div>
+        <div class="notas">
+            <input type="radio" id="q3_1" name="q3" value="1"><label for="q3_1">1</label>
+            <input type="radio" id="q3_2" name="q3" value="2"><label for="q3_2">2</label>
+            <input type="radio" id="q3_3" name="q3" value="3"><label for="q3_3">3</label>
+            <input type="radio" id="q3_4" name="q3" value="4"><label for="q3_4">4</label>
+            <input type="radio" id="q3_5" name="q3" value="5"><label for="q3_5">5</label>
+        </div>
 
-<label>Comentário</label>
-<textarea></textarea>
+        <label>Comentário</label>
+        <textarea></textarea>
 
-<label>Registrado por</label>
-<input type="text">
+        <label>Registrado por</label>
+        <input type="text">
 
-<button class="btn-salvar">Salvar</button>
+        <button class="btn-salvar">Salvar</button>
 
-</form>
+    </form>
 
-<a href="index.html" class="btn-voltar">⬅ Voltar para Home</a>
+    <a href="index.html" class="btn-voltar">⬅ Voltar para Home</a>
 
 </div>
 
