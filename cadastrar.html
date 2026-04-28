@@ -41,7 +41,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
@@ -80,6 +80,7 @@ textarea {
 
 textarea {
     min-height: 100px;
+    resize: vertical;
 }
 
 .linha3,
@@ -109,6 +110,7 @@ textarea {
 .notas input {
     position: absolute;
     opacity: 0;
+    pointer-events: none;
 }
 
 .notas label {
@@ -117,8 +119,9 @@ textarea {
     cursor: pointer;
     border-radius: 6px;
     font-weight: bold;
-    min-width: 30px;
+    min-width: 32px;
     text-align: center;
+    margin-top: 0;
 }
 
 .notas input:checked + label {
@@ -138,6 +141,11 @@ textarea {
     border-radius: 6px;
     cursor: pointer;
     font-size: 15px;
+}
+
+.btn-salvar:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .btn-voltar {
@@ -172,9 +180,7 @@ textarea {
     color: #721c24;
 }
 
-/* 🔥 RESPONSIVIDADE */
 @media (max-width: 700px) {
-
     .container {
         padding: 18px;
         margin: 15px auto;
@@ -196,7 +202,6 @@ textarea {
 
     .btn-imprimir {
         width: 100%;
-        text-align: center;
     }
 
     .notas {
@@ -209,7 +214,6 @@ textarea {
 }
 
 @media (max-width: 420px) {
-
     .container {
         padding: 15px;
     }
@@ -222,7 +226,8 @@ textarea {
         font-size: 18px;
     }
 
-    input, textarea {
+    input,
+    textarea {
         font-size: 15px;
     }
 }
@@ -232,77 +237,97 @@ textarea {
 <body>
 
 <div class="header">
-Cadastro de Avaliação da Manutenção
+    Cadastro de Avaliação da Manutenção
 </div>
 
 <div class="container">
 
-<div class="topo-form">
-<h2>Nova Avaliação</h2>
-<button onclick="imprimirPDF()" class="btn-imprimir" type="button">
-Formulário
-</button>
-</div>
+    <div class="topo-form">
+        <h2>Nova Avaliação</h2>
+        <button onclick="imprimirPDF()" class="btn-imprimir" type="button" id="btnImprimir">
+            Formulário
+        </button>
+    </div>
 
-<form id="form-avaliacao">
+    <form id="form-avaliacao">
 
-<label>Nº da OS</label>
-<input type="text" name="os_numero" required>
+        <label for="os_numero">Nº da OS</label>
+        <input type="text" id="os_numero" name="os_numero" required autocomplete="off">
 
-<div class="linha3">
-<div><label>Equipamento</label><input type="text" name="equipamento" required></div>
-<div><label>Marca</label><input type="text" name="marca" required></div>
-<div><label>Modelo</label><input type="text" name="modelo" required></div>
-</div>
+        <div class="linha3">
+            <div>
+                <label for="equipamento">Equipamento</label>
+                <input type="text" id="equipamento" name="equipamento" required autocomplete="off">
+            </div>
 
-<div class="linha2">
-<div><label>Localização</label><input type="text" name="localizacao" required></div>
-<div><label>Órgão</label><input type="text" name="orgao" required></div>
-</div>
+            <div>
+                <label for="marca">Marca</label>
+                <input type="text" id="marca" name="marca" required autocomplete="off">
+            </div>
 
-<label>Data</label>
-<input type="date" name="data" required>
+            <div>
+                <label for="modelo">Modelo</label>
+                <input type="text" id="modelo" name="modelo" required autocomplete="off">
+            </div>
+        </div>
 
-<div class="pergunta">1. Avaliação do serviço</div>
-<div class="notas">
-<input type="radio" name="q1" value="1" required><label>1</label>
-<input type="radio" name="q1" value="2"><label>2</label>
-<input type="radio" name="q1" value="3"><label>3</label>
-<input type="radio" name="q1" value="4"><label>4</label>
-<input type="radio" name="q1" value="5"><label>5</label>
-</div>
+        <div class="linha2">
+            <div>
+                <label for="localizacao">Localização</label>
+                <input type="text" id="localizacao" name="localizacao" required autocomplete="off">
+            </div>
 
-<div class="pergunta">2. Avaliação do técnico</div>
-<div class="notas">
-<input type="radio" name="q2" value="1" required><label>1</label>
-<input type="radio" name="q2" value="2"><label>2</label>
-<input type="radio" name="q2" value="3"><label>3</label>
-<input type="radio" name="q2" value="4"><label>4</label>
-<input type="radio" name="q2" value="5"><label>5</label>
-</div>
+            <div>
+                <label for="orgao">Órgão</label>
+                <input type="text" id="orgao" name="orgao" required autocomplete="off">
+            </div>
+        </div>
 
-<div class="pergunta">3. Avaliação geral</div>
-<div class="notas">
-<input type="radio" name="q3" value="1" required><label>1</label>
-<input type="radio" name="q3" value="2"><label>2</label>
-<input type="radio" name="q3" value="3"><label>3</label>
-<input type="radio" name="q3" value="4"><label>4</label>
-<input type="radio" name="q3" value="5"><label>5</label>
-</div>
+        <label for="data">Data</label>
+        <input type="date" id="data" name="data" required autocomplete="off">
 
-<label>Comentário</label>
-<textarea name="comentario"></textarea>
+        <div class="pergunta">1. Avaliação do serviço</div>
+        <div class="notas">
+            <input type="radio" id="q1_1" name="q1" value="1" required><label for="q1_1">1</label>
+            <input type="radio" id="q1_2" name="q1" value="2"><label for="q1_2">2</label>
+            <input type="radio" id="q1_3" name="q1" value="3"><label for="q1_3">3</label>
+            <input type="radio" id="q1_4" name="q1" value="4"><label for="q1_4">4</label>
+            <input type="radio" id="q1_5" name="q1" value="5"><label for="q1_5">5</label>
+        </div>
 
-<label>Registrado por</label>
-<input type="text" name="registrado_por" required>
+        <div class="pergunta">2. Avaliação do técnico</div>
+        <div class="notas">
+            <input type="radio" id="q2_1" name="q2" value="1" required><label for="q2_1">1</label>
+            <input type="radio" id="q2_2" name="q2" value="2"><label for="q2_2">2</label>
+            <input type="radio" id="q2_3" name="q2" value="3"><label for="q2_3">3</label>
+            <input type="radio" id="q2_4" name="q2" value="4"><label for="q2_4">4</label>
+            <input type="radio" id="q2_5" name="q2" value="5"><label for="q2_5">5</label>
+        </div>
 
-<div id="mensagem" class="mensagem"></div>
+        <div class="pergunta">3. Avaliação geral</div>
+        <div class="notas">
+            <input type="radio" id="q3_1" name="q3" value="1" required><label for="q3_1">1</label>
+            <input type="radio" id="q3_2" name="q3" value="2"><label for="q3_2">2</label>
+            <input type="radio" id="q3_3" name="q3" value="3"><label for="q3_3">3</label>
+            <input type="radio" id="q3_4" name="q3" value="4"><label for="q3_4">4</label>
+            <input type="radio" id="q3_5" name="q3" value="5"><label for="q3_5">5</label>
+        </div>
 
-<button class="btn-salvar">Salvar</button>
+        <label for="comentario">Comentário</label>
+        <textarea id="comentario" name="comentario" autocomplete="off"></textarea>
 
-</form>
+        <label for="registrado_por">Registrado por</label>
+        <input type="text" id="registrado_por" name="registrado_por" required autocomplete="off">
 
-<a href="index.html" class="btn-voltar">⬅ Voltar para Home</a>
+        <div id="mensagem" class="mensagem"></div>
+
+        <button id="btnSalvar" class="btn-salvar" type="submit">
+            Salvar
+        </button>
+
+    </form>
+
+    <a href="index.html" class="btn-voltar">⬅ Voltar para Home</a>
 
 </div>
 
