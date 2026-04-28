@@ -1,7 +1,7 @@
 console.log("SUPABASE JS CARREGOU");
 
-const SUPABASE_URL = "https://maifzrzarjbnjqehfajv.supabase.co";
-const SUPABASE_ANON_KEY = "https://qwuhsohaitzuzqjqikwn.supabase.co";
+const SUPABASE_URL = "https://qwuhsohaitzuzqjqikwn.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_J6phyZVFiMF5F_V62NzTMg_xbZnjAiy";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
