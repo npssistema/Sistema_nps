@@ -53,13 +53,13 @@ function normalizar(texto) {
         .trim();
 }
 
-function contemIgnorandoAcentoEMaiuscula(valorBanco, valorFiltro) {
+function igualIgnorandoAcentoEMaiuscula(valorBanco, valorFiltro) {
     const banco = normalizar(valorBanco);
     const filtro = normalizar(valorFiltro);
 
     if (!filtro) return true;
 
-    return banco.includes(filtro);
+    return banco === filtro;
 }
 
 function escaparHtml(texto) {
@@ -204,11 +204,11 @@ function aplicarFiltrosTexto(avaliacoes, filtros) {
             return false;
         }
 
-        if (filtros.equipamento && !contemIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) return false;
-        if (filtros.marca && !contemIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) return false;
-        if (filtros.modelo && !contemIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) return false;
-        if (filtros.localizacao && !contemIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) return false;
-        if (filtros.orgao && !contemIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) return false;
+        if (filtros.equipamento && !igualIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) return false;
+        if (filtros.marca && !igualIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) return false;
+        if (filtros.modelo && !igualIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) return false;
+        if (filtros.localizacao && !igualIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) return false;
+        if (filtros.orgao && !igualIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) return false;
 
         return true;
     });

@@ -44,6 +44,35 @@ function escaparHtml(texto) {
         .replace(/'/g, "&#039;");
 }
 
+function normalizar(texto) {
+    return String(texto || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+function igualIgnorandoAcentoEMaiuscula(valorBanco, valorFiltro) {
+    const banco = normalizar(valorBanco);
+    const filtro = normalizar(valorFiltro);
+
+    if (!filtro) return true;
+
+    return banco === filtro;
+}
+
+function aplicarFiltrosTextoExato(lista, filtros) {
+    return lista.filter((item) => {
+        if (filtros.equipamento && !igualIgnorandoAcentoEMaiuscula(item.equipamento, filtros.equipamento)) return false;
+        if (filtros.marca && !igualIgnorandoAcentoEMaiuscula(item.marca, filtros.marca)) return false;
+        if (filtros.modelo && !igualIgnorandoAcentoEMaiuscula(item.modelo, filtros.modelo)) return false;
+        if (filtros.orgao && !igualIgnorandoAcentoEMaiuscula(item.orgao, filtros.orgao)) return false;
+        if (filtros.localizacao && !igualIgnorandoAcentoEMaiuscula(item.localizacao, filtros.localizacao)) return false;
+
+        return true;
+    });
+}
+
 function media(lista) {
     if (!lista.length) return 0;
     return lista.reduce((soma, valor) => soma + Number(valor || 0), 0) / lista.length;
@@ -196,7 +225,6 @@ function renderizarComentarios(lista) {
 function preencherCardsEMetricas(lista) {
     const totalAvaliacoes = lista.length;
     const mediasGerais = lista.map(calcularSatisfacaoGeralItem);
-
 
     const mediaQ1 = media(lista.map((item) => item.q1));
     const mediaQ2 = media(lista.map((item) => item.q2));
@@ -460,36 +488,12 @@ async function buscarAvaliacoes() {
         .from("avaliacoes")
         .select("*");
 
-    if (filtros.equipamento) {
-        query = query.ilike("equipamento", `%${filtros.equipamento}%`);
-    }
-
-    if (filtros.marca) {
-        query = query.ilike("marca", `%${filtros.marca}%`);
-    }
-
-    if (filtros.modelo) {
-        query = query.ilike("modelo", `%${filtros.modelo}%`);
-    }
-
-    if (filtros.orgao) {
-        query = query.ilike("orgao", `%${filtros.orgao}%`);
-    }
-
-    if (filtros.localizacao) {
-        query = query.ilike("localizacao", `%${filtros.localizacao}%`);
-    }
-
     if (filtros.data_inicio) {
         query = query.gte("data", filtros.data_inicio);
     }
 
     if (filtros.data_fim) {
         query = query.lte("data", filtros.data_fim);
-    }
-
-    if (filtros.classificacao) {
-        query = query.eq("classificacao", filtros.classificacao);
     }
 
     const { data, error } = await query.order("data", { ascending: true });
@@ -499,6 +503,8 @@ async function buscarAvaliacoes() {
     }
 
     let lista = aplicarClassificacaoSeNecessario(data || []);
+
+    lista = aplicarFiltrosTextoExato(lista, filtros);
 
     if (filtros.classificacao) {
         lista = lista.filter((item) => item.classificacao === filtros.classificacao);
