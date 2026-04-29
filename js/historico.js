@@ -2,7 +2,7 @@ let classificacaoAtual = "";
 let idParaExcluir = null;
 
 let paginaAtual = 1;
-const itensPorPagina = 10;
+const itensPorPagina = 15;
 let dadosFiltradosGlobais = [];
 
 const tbody = document.getElementById("tabela-avaliacoes");
@@ -10,7 +10,20 @@ const statusBox = document.getElementById("status-box");
 const modalExcluir = document.getElementById("modalExcluir");
 const confirmarExclusaoBtn = document.getElementById("confirmarExclusao");
 const cancelarExclusaoBtn = document.getElementById("cancelarExclusao");
-const paginacaoDiv = document.getElementById("paginacao");
+
+let paginacaoDiv = document.getElementById("paginacao");
+
+if (!paginacaoDiv) {
+    paginacaoDiv = document.createElement("div");
+    paginacaoDiv.id = "paginacao";
+    paginacaoDiv.style.textAlign = "center";
+    paginacaoDiv.style.marginTop = "20px";
+
+    const tabelaResponsiva = document.querySelector(".table-responsive");
+    if (tabelaResponsiva) {
+        tabelaResponsiva.insertAdjacentElement("afterend", paginacaoDiv);
+    }
+}
 
 function mostrarStatus(texto, tipo = "info") {
     statusBox.className = "status-box";
@@ -25,8 +38,10 @@ function esconderStatus() {
 
 function formatarData(dataISO) {
     if (!dataISO) return "";
-    const partes = dataISO.split("-");
+
+    const partes = String(dataISO).split("-");
     if (partes.length !== 3) return dataISO;
+
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
@@ -58,7 +73,29 @@ function escaparHtml(texto) {
         .replace(/'/g, "&#039;");
 }
 
-function obterBadgeClassificacao(classificacao) {
+function obterClassificacaoPorQ3(q3) {
+    const nota = Number(q3);
+
+    if (nota === 1 || nota === 2) return "detrator";
+    if (nota === 3) return "neutro";
+    if (nota === 4 || nota === 5) return "promotor";
+
+    return "";
+}
+
+function obterClasseLinhaPorQ3(q3) {
+    const classificacao = obterClassificacaoPorQ3(q3);
+
+    if (classificacao === "promotor") return "linha-promotor";
+    if (classificacao === "neutro") return "linha-neutro";
+    if (classificacao === "detrator") return "linha-detrator";
+
+    return "";
+}
+
+function obterBadgeClassificacaoPorQ3(q3) {
+    const classificacao = obterClassificacaoPorQ3(q3);
+
     if (classificacao === "promotor") {
         return '<span class="classificacao-badge badge-promotor">Promotor</span>';
     }
@@ -67,13 +104,11 @@ function obterBadgeClassificacao(classificacao) {
         return '<span class="classificacao-badge badge-neutro">Neutro</span>';
     }
 
-    return '<span class="classificacao-badge badge-detrator">Detrator</span>';
-}
+    if (classificacao === "detrator") {
+        return '<span class="classificacao-badge badge-detrator">Detrator</span>';
+    }
 
-function obterClasseLinha(classificacao) {
-    if (classificacao === "promotor") return "linha-promotor";
-    if (classificacao === "neutro") return "linha-neutro";
-    return "linha-detrator";
+    return "";
 }
 
 function lerFiltrosDaTela() {
@@ -133,8 +168,8 @@ function atualizarBotoesClassificacao() {
 }
 
 function montarLinhaHtml(a) {
-    const classeLinha = obterClasseLinha(a.classificacao);
-    const badge = obterBadgeClassificacao(a.classificacao);
+    const classeLinha = obterClasseLinhaPorQ3(a.q3);
+    const badge = obterBadgeClassificacaoPorQ3(a.q3);
 
     return `
         <tr class="${classeLinha}">
@@ -163,25 +198,17 @@ function montarLinhaHtml(a) {
 
 function aplicarFiltrosTexto(avaliacoes, filtros) {
     return avaliacoes.filter((a) => {
-        if (filtros.equipamento && !contemIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) {
+        const classificacaoQ3 = obterClassificacaoPorQ3(a.q3);
+
+        if (filtros.classificacao && classificacaoQ3 !== filtros.classificacao) {
             return false;
         }
 
-        if (filtros.marca && !contemIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) {
-            return false;
-        }
-
-        if (filtros.modelo && !contemIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) {
-            return false;
-        }
-
-        if (filtros.localizacao && !contemIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) {
-            return false;
-        }
-
-        if (filtros.orgao && !contemIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) {
-            return false;
-        }
+        if (filtros.equipamento && !contemIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) return false;
+        if (filtros.marca && !contemIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) return false;
+        if (filtros.modelo && !contemIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) return false;
+        if (filtros.localizacao && !contemIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) return false;
+        if (filtros.orgao && !contemIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) return false;
 
         return true;
     });
@@ -211,15 +238,22 @@ function renderizarTabelaPaginada() {
 function renderizarPaginacao() {
     if (!paginacaoDiv) return;
 
-    const totalPaginas = Math.ceil(dadosFiltradosGlobais.length / itensPorPagina);
+    const totalItens = dadosFiltradosGlobais.length;
+    const totalPaginas = Math.ceil(totalItens / itensPorPagina);
 
     if (totalPaginas <= 1) {
-        paginacaoDiv.innerHTML = "";
+        paginacaoDiv.innerHTML = `
+            <div style="font-size:13px; color:#555;">
+                ${totalItens} avaliações encontradas
+            </div>
+        `;
         return;
     }
 
-    let html = `
-        <button onclick="irParaPagina(${paginaAtual - 1})" 
+    let html = "";
+
+    html += `
+        <button onclick="irParaPagina(${paginaAtual - 1})"
             ${paginaAtual === 1 ? "disabled" : ""}
             style="margin:4px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer;">
             ◀ Anterior
@@ -254,7 +288,8 @@ function renderizarPaginacao() {
 
     html += `
         <div style="margin-top:10px; font-size:13px; color:#555;">
-            Página ${paginaAtual} de ${totalPaginas} | ${dadosFiltradosGlobais.length} avaliação(ões)
+            Página ${paginaAtual} de ${totalPaginas} |
+            ${totalItens} avaliações encontradas
         </div>
     `;
 
@@ -269,10 +304,14 @@ function irParaPagina(pagina) {
     paginaAtual = pagina;
     renderizarTabelaPaginada();
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    const tabelaResponsiva = document.querySelector(".table-responsive");
+
+    if (tabelaResponsiva) {
+        window.scrollTo({
+            top: tabelaResponsiva.offsetTop - 20,
+            behavior: "smooth"
+        });
+    }
 }
 
 async function carregarHistorico() {
@@ -305,10 +344,6 @@ async function carregarHistorico() {
         query = query.lte("data", filtros.data_fim);
     }
 
-    if (filtros.classificacao) {
-        query = query.eq("classificacao", filtros.classificacao);
-    }
-
     const { data, error } = await query;
 
     if (error) {
@@ -324,7 +359,7 @@ async function carregarHistorico() {
         return;
     }
 
-    dadosFiltradosGlobais = aplicarFiltrosTexto(data, filtros);
+    dadosFiltradosGlobais = aplicarFiltrosTexto(data || [], filtros);
     paginaAtual = 1;
 
     renderizarTabelaPaginada();
@@ -358,11 +393,13 @@ async function excluirAvaliacao() {
 
     fecharModalExclusao();
     mostrarStatus("Avaliação excluída com sucesso.", "info");
+
     await carregarHistorico();
 }
 
 document.getElementById("form-filtros").addEventListener("submit", async function (e) {
     e.preventDefault();
+    paginaAtual = 1;
     await carregarHistorico();
 });
 
