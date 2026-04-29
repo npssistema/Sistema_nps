@@ -1,16 +1,33 @@
-let classificacaoSelecionada = "";
+let classificacaoAtual = "";
 let idParaExcluir = null;
 
-const tabela = document.getElementById("tabela-avaliacoes");
-const formFiltros = document.getElementById("form-filtros");
-const btnLimpar = document.getElementById("btn-limpar");
+const tbody = document.getElementById("tabela-avaliacoes");
 const statusBox = document.getElementById("status-box");
-
 const modalExcluir = document.getElementById("modalExcluir");
-const confirmarExclusao = document.getElementById("confirmarExclusao");
-const cancelarExclusao = document.getElementById("cancelarExclusao");
+const confirmarExclusaoBtn = document.getElementById("confirmarExclusao");
+const cancelarExclusaoBtn = document.getElementById("cancelarExclusao");
 
-function normalizarTexto(texto) {
+function mostrarStatus(texto, tipo = "info") {
+    statusBox.className = "status-box";
+    statusBox.classList.add(tipo === "erro" ? "status-erro" : "status-info");
+    statusBox.textContent = texto;
+}
+
+function esconderStatus() {
+    statusBox.className = "status-box";
+    statusBox.textContent = "";
+}
+
+function formatarData(dataISO) {
+    if (!dataISO) return "";
+
+    const partes = dataISO.split("-");
+    if (partes.length !== 3) return dataISO;
+
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function normalizar(texto) {
     return String(texto || "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -18,167 +35,222 @@ function normalizarTexto(texto) {
         .trim();
 }
 
-function textoIgual(valorBanco, valorFiltro) {
-    if (!valorFiltro) return true;
-    return normalizarTexto(valorBanco) === normalizarTexto(valorFiltro);
+function compararIgualIgnorandoAcentoEMaiuscula(valorBanco, valorFiltro) {
+    return normalizar(valorBanco) === normalizar(valorFiltro);
 }
 
-function mostrarStatus(mensagem, tipo = "info") {
-    statusBox.textContent = mensagem;
-    statusBox.className = `status-box status-${tipo}`;
+function escaparHtml(texto) {
+    if (texto === null || texto === undefined) return "";
+
+    return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
-function limparStatus() {
-    statusBox.textContent = "";
-    statusBox.className = "status-box";
-}
-
-function classificarNPS(nota) {
-    const nps = Number(nota);
-
-    if (nps >= 9) return "promotor";
-    if (nps >= 7) return "neutro";
-    return "detrator";
-}
-
-function formatarClassificacao(classificacao) {
+function obterBadgeClassificacao(classificacao) {
     if (classificacao === "promotor") {
-        return `<span class="classificacao-badge badge-promotor">Promotor</span>`;
+        return '<span class="classificacao-badge badge-promotor">Promotor</span>';
     }
 
     if (classificacao === "neutro") {
-        return `<span class="classificacao-badge badge-neutro">Neutro</span>`;
+        return '<span class="classificacao-badge badge-neutro">Neutro</span>';
     }
 
-    return `<span class="classificacao-badge badge-detrator">Detrator</span>`;
+    return '<span class="classificacao-badge badge-detrator">Detrator</span>';
 }
 
-function formatarData(data) {
-    if (!data) return "";
-
-    const partes = data.split("-");
-    if (partes.length !== 3) return data;
-
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+function obterClasseLinha(classificacao) {
+    if (classificacao === "promotor") return "linha-promotor";
+    if (classificacao === "neutro") return "linha-neutro";
+    return "linha-detrator";
 }
 
-async function carregarAvaliacoes() {
-    limparStatus();
+function lerFiltrosDaTela() {
+    return {
+        os: document.getElementById("filtro_os").value.trim(),
+        data_inicio: document.getElementById("filtro_data_inicio").value,
+        data_fim: document.getElementById("filtro_data_fim").value,
+        equipamento: document.getElementById("filtro_equipamento").value.trim(),
+        marca: document.getElementById("filtro_marca").value.trim(),
+        modelo: document.getElementById("filtro_modelo").value.trim(),
+        localizacao: document.getElementById("filtro_localizacao").value.trim(),
+        orgao: document.getElementById("filtro_orgao").value.trim(),
+        classificacao: classificacaoAtual
+    };
+}
 
-    tabela.innerHTML = `
+function preencherFiltrosComUrl() {
+    const params = new URLSearchParams(window.location.search);
+
+    document.getElementById("filtro_os").value = params.get("os") || "";
+    document.getElementById("filtro_data_inicio").value = params.get("data_inicio") || "";
+    document.getElementById("filtro_data_fim").value = params.get("data_fim") || "";
+    document.getElementById("filtro_equipamento").value = params.get("equipamento") || "";
+    document.getElementById("filtro_marca").value = params.get("marca") || "";
+    document.getElementById("filtro_modelo").value = params.get("modelo") || "";
+    document.getElementById("filtro_localizacao").value = params.get("localizacao") || "";
+    document.getElementById("filtro_orgao").value = params.get("orgao") || "";
+
+    classificacaoAtual = params.get("classificacao") || "";
+    atualizarBotoesClassificacao();
+}
+
+function atualizarUrlComFiltros() {
+    const filtros = lerFiltrosDaTela();
+    const params = new URLSearchParams();
+
+    Object.entries(filtros).forEach(([chave, valor]) => {
+        if (valor) params.set(chave, valor);
+    });
+
+    const novaUrl = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+    window.history.replaceState({}, "", novaUrl);
+}
+
+function atualizarBotoesClassificacao() {
+    const botoes = document.querySelectorAll(".btn-classificacao");
+
+    botoes.forEach((botao) => {
+        const valor = botao.dataset.classificacao || "";
+
+        if (valor === classificacaoAtual) {
+            botao.classList.add("ativo");
+        } else {
+            botao.classList.remove("ativo");
+        }
+    });
+}
+
+function montarLinhaHtml(a) {
+    const classeLinha = obterClasseLinha(a.classificacao);
+    const badge = obterBadgeClassificacao(a.classificacao);
+
+    return `
+        <tr class="${classeLinha}">
+            <td>${a.id ?? ""}</td>
+            <td>${escaparHtml(a.os_numero ?? "")}</td>
+            <td>${escaparHtml(a.equipamento ?? "")}</td>
+            <td>${escaparHtml(a.marca ?? "")}</td>
+            <td>${escaparHtml(a.modelo ?? "")}</td>
+            <td>${escaparHtml(a.localizacao ?? "")}</td>
+            <td>${escaparHtml(a.orgao ?? "")}</td>
+            <td>${formatarData(a.data)}</td>
+            <td>${a.q1 ?? ""}</td>
+            <td>${a.q2 ?? ""}</td>
+            <td>${a.q3 ?? ""}</td>
+            <td class="comentario-coluna">${escaparHtml(a.comentario ?? "")}</td>
+            <td>${escaparHtml(a.registrado_por ?? "")}</td>
+            <td>${badge}</td>
+            <td>
+                <button type="button" class="btn-excluir" onclick="abrirModalExclusao(${a.id})">
+                    🗑 Excluir
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
+function renderizarTabela(avaliacoes) {
+    if (!avaliacoes || avaliacoes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="15">Nenhuma avaliação encontrada.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = avaliacoes.map(montarLinhaHtml).join("");
+}
+
+function aplicarFiltrosExatosSemAcento(avaliacoes, filtros) {
+    return avaliacoes.filter((a) => {
+        if (filtros.equipamento && !compararIgualIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) {
+            return false;
+        }
+
+        if (filtros.marca && !compararIgualIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) {
+            return false;
+        }
+
+        if (filtros.modelo && !compararIgualIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) {
+            return false;
+        }
+
+        if (filtros.localizacao && !compararIgualIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) {
+            return false;
+        }
+
+        if (filtros.orgao && !compararIgualIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) {
+            return false;
+        }
+
+        return true;
+    });
+}
+
+async function carregarHistorico() {
+    esconderStatus();
+
+    tbody.innerHTML = `
         <tr>
             <td colspan="15">Carregando avaliações...</td>
         </tr>
     `;
 
-    const os = document.getElementById("filtro_os").value.trim();
-    const dataInicio = document.getElementById("filtro_data_inicio").value;
-    const dataFim = document.getElementById("filtro_data_fim").value;
+    const filtros = lerFiltrosDaTela();
 
-    const equipamento = document.getElementById("filtro_equipamento").value.trim();
-    const marca = document.getElementById("filtro_marca").value.trim();
-    const modelo = document.getElementById("filtro_modelo").value.trim();
-    const localizacao = document.getElementById("filtro_localizacao").value.trim();
-    const orgao = document.getElementById("filtro_orgao").value.trim();
-
-    let query = supabase
+    let query = supabaseClient
         .from("avaliacoes")
         .select("*")
         .order("id", { ascending: false });
 
-    if (os) {
-        query = query.eq("os", os);
+    if (filtros.os) {
+        query = query.ilike("os_numero", `%${filtros.os}%`);
     }
 
-    if (dataInicio) {
-        query = query.gte("data_manutencao", dataInicio);
+    if (filtros.data_inicio) {
+        query = query.gte("data", filtros.data_inicio);
     }
 
-    if (dataFim) {
-        query = query.lte("data_manutencao", dataFim);
+    if (filtros.data_fim) {
+        query = query.lte("data", filtros.data_fim);
+    }
+
+    if (filtros.classificacao) {
+        query = query.eq("classificacao", filtros.classificacao);
     }
 
     const { data, error } = await query;
 
     if (error) {
-        console.error(error);
-        tabela.innerHTML = `
+        console.error("Erro ao carregar histórico:", error);
+
+        tbody.innerHTML = `
             <tr>
-                <td colspan="15">Erro ao carregar avaliações.</td>
+                <td colspan="15">Erro ao carregar dados.</td>
             </tr>
         `;
-        mostrarStatus("Erro ao carregar avaliações.", "erro");
+
+        mostrarStatus("Erro ao carregar histórico: " + error.message, "erro");
         return;
     }
 
-    let avaliacoesFiltradas = data.filter(item => {
-        const classificacao = classificarNPS(item.nota_suporte);
+    const dadosFiltrados = aplicarFiltrosExatosSemAcento(data, filtros);
 
-        return (
-            textoIgual(item.equipamento, equipamento) &&
-            textoIgual(item.marca, marca) &&
-            textoIgual(item.modelo, modelo) &&
-            textoIgual(item.localizacao, localizacao) &&
-            textoIgual(item.orgao, orgao) &&
-            (!classificacaoSelecionada || classificacao === classificacaoSelecionada)
-        );
-    });
-
-    if (avaliacoesFiltradas.length === 0) {
-        tabela.innerHTML = `
-            <tr>
-                <td colspan="15">Nenhuma avaliação encontrada.</td>
-            </tr>
-        `;
-        mostrarStatus("Nenhuma avaliação encontrada com os filtros informados.", "info");
-        return;
-    }
-
-    tabela.innerHTML = "";
-
-    avaliacoesFiltradas.forEach(item => {
-        const classificacao = classificarNPS(item.nota_suporte);
-
-        let classeLinha = "";
-        if (classificacao === "promotor") classeLinha = "linha-promotor";
-        if (classificacao === "neutro") classeLinha = "linha-neutro";
-        if (classificacao === "detrator") classeLinha = "linha-detrator";
-
-        const linha = document.createElement("tr");
-        linha.className = classeLinha;
-
-        linha.innerHTML = `
-            <td>${item.id || ""}</td>
-            <td>${item.os || ""}</td>
-            <td>${item.equipamento || ""}</td>
-            <td>${item.marca || ""}</td>
-            <td>${item.modelo || ""}</td>
-            <td>${item.localizacao || ""}</td>
-            <td>${item.orgao || ""}</td>
-            <td>${formatarData(item.data_manutencao)}</td>
-            <td>${item.nota_servico || ""}</td>
-            <td>${item.nota_tecnico || ""}</td>
-            <td>${item.nota_suporte || ""}</td>
-            <td class="comentario-coluna">${item.comentario || ""}</td>
-            <td>${item.registrado_por || ""}</td>
-            <td>${formatarClassificacao(classificacao)}</td>
-            <td>
-                <button class="btn-excluir" onclick="abrirModalExcluir(${item.id})">
-                    Excluir
-                </button>
-            </td>
-        `;
-
-        tabela.appendChild(linha);
-    });
+    renderizarTabela(dadosFiltrados);
+    atualizarUrlComFiltros();
 }
 
-function abrirModalExcluir(id) {
+function abrirModalExclusao(id) {
     idParaExcluir = id;
     modalExcluir.style.display = "flex";
 }
 
-function fecharModalExcluir() {
+function fecharModalExclusao() {
     idParaExcluir = null;
     modalExcluir.style.display = "none";
 }
@@ -186,61 +258,56 @@ function fecharModalExcluir() {
 async function excluirAvaliacao() {
     if (!idParaExcluir) return;
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from("avaliacoes")
         .delete()
         .eq("id", idParaExcluir);
 
     if (error) {
-        console.error(error);
-        mostrarStatus("Erro ao excluir avaliação.", "erro");
-        fecharModalExcluir();
+        console.error("Erro ao excluir avaliação:", error);
+        mostrarStatus("Erro ao excluir avaliação: " + error.message, "erro");
+        fecharModalExclusao();
         return;
     }
 
-    fecharModalExcluir();
-    carregarAvaliacoes();
+    fecharModalExclusao();
+    mostrarStatus("Avaliação excluída com sucesso.", "info");
+    await carregarHistorico();
 }
 
-formFiltros.addEventListener("submit", function(event) {
-    event.preventDefault();
-    carregarAvaliacoes();
+document.getElementById("form-filtros").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    await carregarHistorico();
 });
 
-btnLimpar.addEventListener("click", function() {
-    formFiltros.reset();
-    classificacaoSelecionada = "";
-
-    document.querySelectorAll(".btn-classificacao").forEach(btn => {
-        btn.classList.remove("ativo");
-    });
-
-    document.querySelector('.btn-classificacao[data-classificacao=""]').classList.add("ativo");
-
-    carregarAvaliacoes();
+document.getElementById("btn-limpar").addEventListener("click", async function () {
+    document.getElementById("form-filtros").reset();
+    classificacaoAtual = "";
+    atualizarBotoesClassificacao();
+    esconderStatus();
+    await carregarHistorico();
 });
 
-document.querySelectorAll(".btn-classificacao").forEach(botao => {
-    botao.addEventListener("click", function() {
-        classificacaoSelecionada = this.dataset.classificacao;
-
-        document.querySelectorAll(".btn-classificacao").forEach(btn => {
-            btn.classList.remove("ativo");
-        });
-
-        this.classList.add("ativo");
-
-        carregarAvaliacoes();
+document.querySelectorAll(".btn-classificacao").forEach((botao) => {
+    botao.addEventListener("click", async function () {
+        classificacaoAtual = this.dataset.classificacao || "";
+        atualizarBotoesClassificacao();
+        await carregarHistorico();
     });
 });
 
-confirmarExclusao.addEventListener("click", excluirAvaliacao);
-cancelarExclusao.addEventListener("click", fecharModalExcluir);
+confirmarExclusaoBtn.addEventListener("click", excluirAvaliacao);
+cancelarExclusaoBtn.addEventListener("click", fecharModalExclusao);
 
-modalExcluir.addEventListener("click", function(event) {
+window.addEventListener("click", function (event) {
     if (event.target === modalExcluir) {
-        fecharModalExcluir();
+        fecharModalExclusao();
     }
 });
 
-carregarAvaliacoes();
+document.addEventListener("DOMContentLoaded", async function () {
+    preencherFiltrosComUrl();
+    await carregarHistorico();
+});
+
+window.abrirModalExclusao = abrirModalExclusao;
