@@ -1,11 +1,16 @@
 let classificacaoAtual = "";
 let idParaExcluir = null;
 
+let paginaAtual = 1;
+const itensPorPagina = 10;
+let dadosFiltradosGlobais = [];
+
 const tbody = document.getElementById("tabela-avaliacoes");
 const statusBox = document.getElementById("status-box");
 const modalExcluir = document.getElementById("modalExcluir");
 const confirmarExclusaoBtn = document.getElementById("confirmarExclusao");
 const cancelarExclusaoBtn = document.getElementById("cancelarExclusao");
+const paginacaoDiv = document.getElementById("paginacao");
 
 function mostrarStatus(texto, tipo = "info") {
     statusBox.className = "status-box";
@@ -20,10 +25,8 @@ function esconderStatus() {
 
 function formatarData(dataISO) {
     if (!dataISO) return "";
-
     const partes = dataISO.split("-");
     if (partes.length !== 3) return dataISO;
-
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
@@ -35,8 +38,13 @@ function normalizar(texto) {
         .trim();
 }
 
-function compararIgualIgnorandoAcentoEMaiuscula(valorBanco, valorFiltro) {
-    return normalizar(valorBanco) === normalizar(valorFiltro);
+function contemIgnorandoAcentoEMaiuscula(valorBanco, valorFiltro) {
+    const banco = normalizar(valorBanco);
+    const filtro = normalizar(valorFiltro);
+
+    if (!filtro) return true;
+
+    return banco.includes(filtro);
 }
 
 function escaparHtml(texto) {
@@ -153,42 +161,117 @@ function montarLinhaHtml(a) {
     `;
 }
 
-function renderizarTabela(avaliacoes) {
-    if (!avaliacoes || avaliacoes.length === 0) {
+function aplicarFiltrosTexto(avaliacoes, filtros) {
+    return avaliacoes.filter((a) => {
+        if (filtros.equipamento && !contemIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) {
+            return false;
+        }
+
+        if (filtros.marca && !contemIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) {
+            return false;
+        }
+
+        if (filtros.modelo && !contemIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) {
+            return false;
+        }
+
+        if (filtros.localizacao && !contemIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) {
+            return false;
+        }
+
+        if (filtros.orgao && !contemIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) {
+            return false;
+        }
+
+        return true;
+    });
+}
+
+function renderizarTabelaPaginada() {
+    if (!dadosFiltradosGlobais || dadosFiltradosGlobais.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="15">Nenhuma avaliação encontrada.</td>
             </tr>
         `;
+
+        if (paginacaoDiv) paginacaoDiv.innerHTML = "";
         return;
     }
 
-    tbody.innerHTML = avaliacoes.map(montarLinhaHtml).join("");
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const dadosDaPagina = dadosFiltradosGlobais.slice(inicio, fim);
+
+    tbody.innerHTML = dadosDaPagina.map(montarLinhaHtml).join("");
+
+    renderizarPaginacao();
 }
 
-function aplicarFiltrosExatosSemAcento(avaliacoes, filtros) {
-    return avaliacoes.filter((a) => {
-        if (filtros.equipamento && !compararIgualIgnorandoAcentoEMaiuscula(a.equipamento, filtros.equipamento)) {
-            return false;
-        }
+function renderizarPaginacao() {
+    if (!paginacaoDiv) return;
 
-        if (filtros.marca && !compararIgualIgnorandoAcentoEMaiuscula(a.marca, filtros.marca)) {
-            return false;
-        }
+    const totalPaginas = Math.ceil(dadosFiltradosGlobais.length / itensPorPagina);
 
-        if (filtros.modelo && !compararIgualIgnorandoAcentoEMaiuscula(a.modelo, filtros.modelo)) {
-            return false;
-        }
+    if (totalPaginas <= 1) {
+        paginacaoDiv.innerHTML = "";
+        return;
+    }
 
-        if (filtros.localizacao && !compararIgualIgnorandoAcentoEMaiuscula(a.localizacao, filtros.localizacao)) {
-            return false;
-        }
+    let html = `
+        <button onclick="irParaPagina(${paginaAtual - 1})" 
+            ${paginaAtual === 1 ? "disabled" : ""}
+            style="margin:4px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer;">
+            ◀ Anterior
+        </button>
+    `;
 
-        if (filtros.orgao && !compararIgualIgnorandoAcentoEMaiuscula(a.orgao, filtros.orgao)) {
-            return false;
-        }
+    for (let i = 1; i <= totalPaginas; i++) {
+        html += `
+            <button onclick="irParaPagina(${i})"
+                style="
+                    margin:4px;
+                    padding:8px 12px;
+                    border:none;
+                    border-radius:6px;
+                    cursor:pointer;
+                    background:${i === paginaAtual ? "#1f3c88" : "#ddd"};
+                    color:${i === paginaAtual ? "white" : "#333"};
+                    font-weight:${i === paginaAtual ? "bold" : "normal"};
+                ">
+                ${i}
+            </button>
+        `;
+    }
 
-        return true;
+    html += `
+        <button onclick="irParaPagina(${paginaAtual + 1})"
+            ${paginaAtual === totalPaginas ? "disabled" : ""}
+            style="margin:4px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer;">
+            Próximo ▶
+        </button>
+    `;
+
+    html += `
+        <div style="margin-top:10px; font-size:13px; color:#555;">
+            Página ${paginaAtual} de ${totalPaginas} | ${dadosFiltradosGlobais.length} avaliação(ões)
+        </div>
+    `;
+
+    paginacaoDiv.innerHTML = html;
+}
+
+function irParaPagina(pagina) {
+    const totalPaginas = Math.ceil(dadosFiltradosGlobais.length / itensPorPagina);
+
+    if (pagina < 1 || pagina > totalPaginas) return;
+
+    paginaAtual = pagina;
+    renderizarTabelaPaginada();
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
     });
 }
 
@@ -200,6 +283,8 @@ async function carregarHistorico() {
             <td colspan="15">Carregando avaliações...</td>
         </tr>
     `;
+
+    if (paginacaoDiv) paginacaoDiv.innerHTML = "";
 
     const filtros = lerFiltrosDaTela();
 
@@ -239,9 +324,10 @@ async function carregarHistorico() {
         return;
     }
 
-    const dadosFiltrados = aplicarFiltrosExatosSemAcento(data, filtros);
+    dadosFiltradosGlobais = aplicarFiltrosTexto(data, filtros);
+    paginaAtual = 1;
 
-    renderizarTabela(dadosFiltrados);
+    renderizarTabelaPaginada();
     atualizarUrlComFiltros();
 }
 
@@ -282,16 +368,23 @@ document.getElementById("form-filtros").addEventListener("submit", async functio
 
 document.getElementById("btn-limpar").addEventListener("click", async function () {
     document.getElementById("form-filtros").reset();
+
     classificacaoAtual = "";
+    paginaAtual = 1;
+
     atualizarBotoesClassificacao();
     esconderStatus();
+
     await carregarHistorico();
 });
 
 document.querySelectorAll(".btn-classificacao").forEach((botao) => {
     botao.addEventListener("click", async function () {
         classificacaoAtual = this.dataset.classificacao || "";
+        paginaAtual = 1;
+
         atualizarBotoesClassificacao();
+
         await carregarHistorico();
     });
 });
@@ -311,3 +404,4 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 window.abrirModalExclusao = abrirModalExclusao;
+window.irParaPagina = irParaPagina;
