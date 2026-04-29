@@ -131,13 +131,12 @@ function atualizarLinksHistorico() {
 
 function aplicarClassificacaoSeNecessario(lista) {
     return lista.map((item) => {
-        if (item.classificacao) return item;
-
-        const mediaGeral = (Number(item.q1 || 0) + Number(item.q2 || 0) + Number(item.q3 || 0)) / 3;
+        const q3 = Number(item.q3 || 0);
 
         let classificacao = "detrator";
-        if (mediaGeral >= 4) classificacao = "promotor";
-        else if (mediaGeral >= 3) classificacao = "neutro";
+
+        if (q3 === 3) classificacao = "neutro";
+        if (q3 === 4 || q3 === 5) classificacao = "promotor";
 
         return { ...item, classificacao };
     });
@@ -198,6 +197,7 @@ function preencherCardsEMetricas(lista) {
     const totalAvaliacoes = lista.length;
     const mediasGerais = lista.map(calcularSatisfacaoGeralItem);
 
+
     const mediaQ1 = media(lista.map((item) => item.q1));
     const mediaQ2 = media(lista.map((item) => item.q2));
     const mediaQ3 = media(lista.map((item) => item.q3));
@@ -210,7 +210,7 @@ function preencherCardsEMetricas(lista) {
     const percPromotores = totalAvaliacoes ? (promotores / totalAvaliacoes) * 100 : 0;
     const percNeutros = totalAvaliacoes ? (neutros / totalAvaliacoes) * 100 : 0;
     const percDetratores = totalAvaliacoes ? (detratores / totalAvaliacoes) * 100 : 0;
-    const nps = Math.round(percPromotores - percDetratores);
+    const nps = percPromotores - percDetratores;
 
     const criticas = mediasGerais.filter((valor) => valor < 3).length;
     const percCriticas = totalAvaliacoes ? (criticas / totalAvaliacoes) * 100 : 0;
@@ -229,7 +229,7 @@ function preencherCardsEMetricas(lista) {
     document.getElementById("media_q1").textContent = formatarNumero(mediaQ1);
     document.getElementById("media_q2").textContent = formatarNumero(mediaQ2);
     document.getElementById("media_q3").textContent = formatarNumero(mediaQ3);
-    document.getElementById("nps").textContent = String(nps);
+    document.getElementById("nps").textContent = formatarNumero(nps, 2);
 
     document.getElementById("perc_promotores").textContent = formatarNumero(percPromotores, 0);
     document.getElementById("perc_neutros").textContent = formatarNumero(percNeutros, 0);
@@ -498,7 +498,13 @@ async function buscarAvaliacoes() {
         throw error;
     }
 
-    return aplicarClassificacaoSeNecessario(data || []);
+    let lista = aplicarClassificacaoSeNecessario(data || []);
+
+    if (filtros.classificacao) {
+        lista = lista.filter((item) => item.classificacao === filtros.classificacao);
+    }
+
+    return lista;
 }
 
 async function carregarGraficos() {
