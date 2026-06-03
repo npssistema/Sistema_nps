@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Metrolife</title>
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            border-bottom: 4px solid #2386c9;
+        }
+        .logo {
+            height: 60px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #0a3659;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 22px;
+        }
+        .campo {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            height: 48px;
+            padding: 10px 15px;
+            font-size: 15px;
+            border: 1px solid #cfcfcf;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            border-color: #2386c9;
+            box-shadow: 0 0 6px rgba(35, 134, 201, 0.25);
+        }
+        .btn-entrar {
+            width: 100%;
+            height: 50px;
+            background: #0a3659;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .btn-entrar:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .btn-entrar:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .erro-msg {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 15px;
+            display: none;
+            background: #fdf3f4;
+            padding: 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <img src="logo.png" alt="Metrolife" class="logo">
+        <h2>Acesso ao Sistema</h2>
+
+        <form id="form-login">
+            <div class="campo">
+                <label for="email">E-mail corporativo</label>
+                <input type="email" id="email" required autocomplete="email" placeholder="exemplo@metrolife.com">
+            </div>
+
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" required placeholder="••••••••">
+            </div>
+
+            <div id="erro-login" class="erro-msg">E-mail ou senha incorretos.</div>
+
+            <button type="submit" class="btn-entrar" id="btn-submit">Entrar</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

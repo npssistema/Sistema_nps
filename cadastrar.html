@@ -3,33 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Avaliação</title>
+    <title>Cadastro de Avaliação - Metrolife</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background: #f2f4f8;
+            background: #eef2f7; /* Fundo levemente mais frio */
             margin: 0;
             padding: 0;
         }
 
+        /* --- NOVO CABEÇALHO METROLIFE --- */
         .header {
-            background: #1f3c88;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 18px;
+            background: #ffffff;
+            color: #0a3659;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-bottom: 4px solid #2386c9; /* Detalhe em azul claro */
+        }
+
+        .header .logo {
+            height: 55px; /* Altura da logo */
+            margin-right: 25px;
+            object-fit: contain;
+        }
+
+        .header .header-title {
+            font-size: 20px;
             font-weight: bold;
+            border-left: 2px solid #2386c9; /* Linha divisória azul claro */
+            padding-left: 25px;
+            line-height: 1.2;
+        }
+
+        .btn-sair {
+            position: absolute;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .btn-sair:hover {
+            background: #c82333;
         }
 
         .container {
             width: 700px;
             max-width: calc(100% - 30px);
-            margin: 30px auto;
+            margin: 120px auto 30px auto; /* Ajustado para o novo header fixo */
             background: white;
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+            border-radius: 14px;
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.08);
         }
 
         .topo-form {
@@ -41,6 +85,7 @@
 
         h2 {
             margin: 0;
+            color: #0a3659; /* Azul Escuro Metrolife */
         }
 
         .btn-imprimir {
@@ -52,10 +97,12 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
+            transition: 0.2s;
         }
 
         .btn-imprimir:hover {
-            background: #5a6268;
+            opacity: 0.85;
+            transform: translateY(-1px);
         }
 
         label {
@@ -63,6 +110,7 @@
             display: block;
             margin-top: 15px;
             font-size: 13px;
+            color: #444;
         }
 
         input,
@@ -74,11 +122,18 @@
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 14px;
+            transition: all 0.3s ease;
         }
 
         textarea {
             min-height: 100px;
             resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #2386c9;
+            box-shadow: 0 0 6px rgba(35, 134, 201, 0.25);
+            outline: none;
         }
 
         .linha3,
@@ -96,6 +151,7 @@
             margin-top: 20px;
             font-weight: bold;
             font-size: 14px;
+            color: #0a3659; /* Azul Escuro Metrolife */
         }
 
         .notas {
@@ -118,25 +174,57 @@
             font-weight: bold;
             min-width: 18px;
             text-align: center;
+            transition: 0.2s;
         }
 
         .notas input:checked + label {
-            background: #1f3c88;
+            background: #2386c9; /* Azul Claro Metrolife */
             color: white;
-            border-color: #1f3c88;
+            border-color: #2386c9;
+        }
+
+        .checkbox-recusa {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #fdf3f4;
+            border-left: 4px solid #d9534f;
+            border-radius: 4px;
+        }
+
+        .checkbox-recusa label {
+            margin-top: 0;
+            color: #d9534f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .checkbox-recusa input {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+            cursor: pointer;
         }
 
         .btn-salvar {
             width: 100%;
             margin-top: 25px;
             padding: 14px;
-            background: #007bff;
+            background: #2386c9; /* Azul Claro Metrolife */
             color: white;
             font-weight: bold;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .btn-salvar:hover:not(:disabled) {
+            opacity: 0.85;
+            transform: translateY(-1px);
         }
 
         .btn-salvar:disabled {
@@ -149,11 +237,17 @@
             margin-top: 15px;
             text-align: center;
             padding: 12px;
-            background: #28a745;
+            background: #0a3659; /* Azul Escuro Metrolife */
             color: white;
             text-decoration: none;
             border-radius: 6px;
             font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-voltar:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
         }
 
         .mensagem {
@@ -179,14 +273,38 @@
         }
 
         @media (max-width: 700px) {
+            .header {
+                flex-direction: column;
+                padding: 15px 10px;
+            }
+            .header .logo {
+                margin-right: 0;
+                margin-bottom: 10px;
+                height: 45px;
+            }
+            .header .header-title {
+                border-left: none;
+                border-top: 2px solid #2386c9;
+                padding-left: 0;
+                padding-top: 10px;
+                text-align: center;
+                font-size: 17px;
+                margin-bottom: 15px;
+            }
+            .btn-sair {
+                position: relative;
+                right: 0;
+                width: 100%;
+                margin-top: 10px;
+            }
+            .container {
+                margin-top: 180px;
+                padding: 18px;
+            }
             .linha3,
             .linha2 {
                 flex-direction: column;
                 gap: 0;
-            }
-
-            .container {
-                padding: 18px;
             }
         }
     </style>
@@ -195,7 +313,9 @@
 <body>
 
 <div class="header">
-    Cadastro de Avaliação da Manutenção
+    <img src="logo.png" alt="Metrolife Eletromedicina" class="logo">
+    <div class="header-title">Cadastro de Avaliação da Manutenção</div>
+    <button class="btn-sair" onclick="fazerLogout()">Sair</button>
 </div>
 
 <div class="container">
@@ -203,7 +323,7 @@
     <div class="topo-form">
         <h2>Nova Avaliação</h2>
         <button onclick="imprimirPDF()" class="btn-imprimir" type="button" id="btnImprimir" name="btnImprimir">
-            Formulário
+            Formulário em PDF
         </button>
     </div>
 
@@ -237,14 +357,22 @@
 
             <div>
                 <label for="orgao">Órgão</label>
-                <input type="text" id="orgao" name="orgao" required autocomplete="off">
+                <input type="text" id="orgao" name="orgao" list="lista-orgaos" required autocomplete="off">
+                <datalist id="lista-orgaos"></datalist>
             </div>
         </div>
 
         <label for="data">Data</label>
         <input type="date" id="data" name="data" required autocomplete="off">
 
-        <div class="pergunta">1.  Como você avalia o serviço do conserto realizado nesta OS?</div>
+        <div class="checkbox-recusa">
+            <label>
+                <input type="checkbox" id="recusou_responder" name="recusou_responder">
+                O setor se recusou a avaliar / responder
+            </label>
+        </div>
+
+        <div class="pergunta">1. Como você avalia o serviço do conserto realizado nesta OS?</div>
         <div class="notas">
             <input type="radio" id="q1_1" name="q1" value="1" required autocomplete="off"><label for="q1_1">1</label>
             <input type="radio" id="q1_2" name="q1" value="2" required autocomplete="off"><label for="q1_2">2</label>
@@ -253,8 +381,7 @@
             <input type="radio" id="q1_5" name="q1" value="5" required autocomplete="off"><label for="q1_5">5</label>
         </div>
 
-        <div class="pergunta">2.  Como  você  avalia  o  técnico  (postura,  educação  e  clareza)  que  realizou  o 
-serviço? </div>
+        <div class="pergunta">2. Como você avalia o técnico (postura, educação e clareza) que realizou o serviço?</div>
         <div class="notas">
             <input type="radio" id="q2_1" name="q2" value="1" required autocomplete="off"><label for="q2_1">1</label>
             <input type="radio" id="q2_2" name="q2" value="2" required autocomplete="off"><label for="q2_2">2</label>
@@ -263,8 +390,7 @@ serviço? </div>
             <input type="radio" id="q2_5" name="q2" value="5" required autocomplete="off"><label for="q2_5">5</label>
         </div>
 
-        <div class="pergunta">3.  No  geral,  como  você  avalia  o  suporte  e  o  atendimento  do  setor  de  Engenharia 
-Clínica? </div>
+        <div class="pergunta">3. No geral, como você avalia o suporte e o atendimento do setor de Engenharia Clínica?</div>
         <div class="notas">
             <input type="radio" id="q3_1" name="q3" value="1" required autocomplete="off"><label for="q3_1">1</label>
             <input type="radio" id="q3_2" name="q3" value="2" required autocomplete="off"><label for="q3_2">2</label>
@@ -299,6 +425,7 @@ function imprimirPDF() {
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/cadastrar.js"></script>
 
 </body>
