@@ -27,28 +27,54 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
     btnSalvar.textContent = "Salvando...";
 
     const form = e.target;
-
-    const dados = {
-        os_numero: form.os_numero.value.trim(),
-        equipamento: form.equipamento.value.trim(),
-        marca: form.marca.value.trim(),
-        modelo: form.modelo.value.trim(),
-        localizacao: form.localizacao.value.trim(),
-        orgao: form.orgao.value.trim(),
-        data: form.data.value,
-        q1: Number(form.q1.value),
-        q2: Number(form.q2.value),
-        q3: Number(form.q3.value),
-        comentario: form.comentario.value.trim(),
-        registrado_por: form.registrado_por.value.trim(),
-        classificacao: calcularClassificacao(
-            form.q1.value,
-            form.q2.value,
-            form.q3.value
-        )
-    };
+    const osNumero = form.os_numero.value.trim();
 
     try {
+        // 1. Verificação de OS duplicada
+        const { data: osExistente, error: erroBusca } = await supabaseClient
+            .from("avaliacoes")
+            .select("id")
+            .eq("os_numero", osNumero)
+            .maybeSingle();
+
+        if (erroBusca) {
+            mostrarMensagem("Erro ao verificar OS: " + erroBusca.message, "erro");
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar";
+            return;
+        }
+
+        if (osExistente) {
+            mostrarMensagem(`A Ordem de Serviço ${osNumero} já possui uma avaliação cadastrada!`, "erro");
+            form.os_numero.focus();
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar";
+            return;
+        }
+
+        // 2. Captura do estado de recusa e montagem dos dados
+        const recusouResponder = form.recusou_responder ? form.recusou_responder.checked : false;
+
+        const dados = {
+            os_numero: osNumero,
+            equipamento: form.equipamento.value.trim(),
+            marca: form.marca.value.trim(),
+            modelo: form.modelo.value.trim(),
+            localizacao: form.localizacao.value.trim(),
+            orgao: form.orgao.value.trim(),
+            data: form.data.value,
+            registrado_por: form.registrado_por.value.trim(),
+            recusou_responder: recusouResponder,
+            
+            // Se recusou responder, salva como null para não prejudicar as médias
+            q1: recusouResponder ? null : Number(form.q1.value),
+            q2: recusouResponder ? null : Number(form.q2.value),
+            q3: recusouResponder ? null : Number(form.q3.value),
+            comentario: recusouResponder ? null : form.comentario.value.trim(),
+            classificacao: recusouResponder ? null : calcularClassificacao(form.q1.value, form.q2.value, form.q3.value)
+        };
+
+        // 3. Inserção no Supabase
         const { error } = await supabaseClient
             .from("avaliacoes")
             .insert([dados]);
@@ -60,6 +86,18 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
 
         mostrarMensagem("Avaliação salva com sucesso!", "sucesso");
         form.reset();
+        
+        // Reativa os campos caso a OS anterior tenha sido recusada
+        const botoesNota = document.querySelectorAll('input[type="radio"]');
+        const campoComentario = document.getElementById('comentario');
+        
+        botoesNota.forEach(radio => {
+            radio.disabled = false;
+            radio.setAttribute('required', 'required');
+        });
+        if (campoComentario) {
+            campoComentario.disabled = false;
+        }
 
     } catch (err) {
         console.error(err);
@@ -71,14 +109,96 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    // 1. Lógica para setar a data atual
     const campoData = document.getElementById("data");
 
-    if (!campoData.value) {
+    if (campoData && !campoData.value) {
         const hoje = new Date();
         const ano = hoje.getFullYear();
         const mes = String(hoje.getMonth() + 1).padStart(2, "0");
         const dia = String(hoje.getDate()).padStart(2, "0");
 
         campoData.value = `${ano}-${mes}-${dia}`;
+    }
+
+    // 2. Lógica para o Checkbox "Recusou a responder" com Radio Buttons
+    const checkboxRecusou = document.getElementById('recusou_responder');
+    const botoesNota = document.querySelectorAll('input[type="radio"]');
+    const campoComentario = document.getElementById('comentario');
+
+    if (checkboxRecusou) {
+        checkboxRecusou.addEventListener('change', function(e) {
+            const isChecked = e.target.checked;
+            
+            // Habilita/Desabilita os radios e tira o required
+            botoesNota.forEach(radio => {
+                radio.disabled = isChecked;
+                if (isChecked) {
+                    radio.checked = false;
+                    radio.removeAttribute('required');
+                } else {
+                    radio.setAttribute('required', 'required');
+                }
+            });
+
+            // Habilita/Desabilita e limpa o comentário
+            if (campoComentario) {
+                campoComentario.disabled = isChecked;
+                if (isChecked) {
+                    campoComentario.value = "";
+                }
+            }
+        });
+    }
+
+    // Lógica para o Autocomplete do campo Órgão
+    const datalistOrgaos = document.getElementById('lista-orgaos');
+    // Lista de órgãos atualizada conforme GETS
+    const listaDeOrgaos = [
+        "CREDESH",
+        "DGC",
+        "DIRQS",
+        "DIVGP",
+        "HO-UFU",
+        "STCOR",
+        "STEC",
+        "UACE",
+        "UADCP",
+        "UAPAT",
+        "UBCME",
+        "UCA",
+        "UCAP",
+        "UCIR",
+        "UCM",
+        "UDI",
+        "UFCD",
+        "UGPESQ",
+        "UHH",
+        "ULAC",
+        "UMUL",
+        "UNUT",
+        "UONC",
+        "UPDR",
+        "UREAB",
+        "URES",
+        "USCV",
+        "USD",
+        "USME",
+        "USNE",
+        "USOST",
+        "USUR",
+        "UTIAD",
+        "UTINEO",
+        "UTO",
+        "UUE",
+        "UVS"
+    ];
+
+    if (datalistOrgaos) {
+        listaDeOrgaos.forEach(orgao => {
+            const option = document.createElement('option');
+            option.value = orgao;
+            datalistOrgaos.appendChild(option);
+        });
     }
 });

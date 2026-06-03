@@ -73,8 +73,11 @@ function escaparHtml(texto) {
         .replace(/'/g, "&#039;");
 }
 
-function obterClassificacaoPorQ3(q3) {
-    const nota = Number(q3);
+// --- AJUSTE: Função agora lê o objeto inteiro para verificar se é recusa ---
+function obterClassificacaoPorItem(item) {
+    if (item.recusou_responder) return "recusa";
+
+    const nota = Number(item.q3);
 
     if (nota === 1 || nota === 2) return "detrator";
     if (nota === 3) return "neutro";
@@ -83,9 +86,10 @@ function obterClassificacaoPorQ3(q3) {
     return "";
 }
 
-function obterClasseLinhaPorQ3(q3) {
-    const classificacao = obterClassificacaoPorQ3(q3);
+function obterClasseLinhaPorItem(item) {
+    const classificacao = obterClassificacaoPorItem(item);
 
+    if (classificacao === "recusa") return "linha-recusa";
     if (classificacao === "promotor") return "linha-promotor";
     if (classificacao === "neutro") return "linha-neutro";
     if (classificacao === "detrator") return "linha-detrator";
@@ -93,8 +97,12 @@ function obterClasseLinhaPorQ3(q3) {
     return "";
 }
 
-function obterBadgeClassificacaoPorQ3(q3) {
-    const classificacao = obterClassificacaoPorQ3(q3);
+function obterBadgeClassificacaoPorItem(item) {
+    const classificacao = obterClassificacaoPorItem(item);
+
+    if (classificacao === "recusa") {
+        return '<span class="classificacao-badge badge-recusa">Recusou</span>';
+    }
 
     if (classificacao === "promotor") {
         return '<span class="classificacao-badge badge-promotor">Promotor</span>';
@@ -168,8 +176,13 @@ function atualizarBotoesClassificacao() {
 }
 
 function montarLinhaHtml(a) {
-    const classeLinha = obterClasseLinhaPorQ3(a.q3);
-    const badge = obterBadgeClassificacaoPorQ3(a.q3);
+    const classeLinha = obterClasseLinhaPorItem(a);
+    const badge = obterBadgeClassificacaoPorItem(a);
+
+    // AJUSTE: Se for recusa, exibe "-" em vez de vazio nas notas
+    const p1 = a.recusou_responder ? "-" : (a.q1 ?? "");
+    const p2 = a.recusou_responder ? "-" : (a.q2 ?? "");
+    const p3 = a.recusou_responder ? "-" : (a.q3 ?? "");
 
     return `
         <tr class="${classeLinha}">
@@ -181,9 +194,9 @@ function montarLinhaHtml(a) {
             <td>${escaparHtml(a.localizacao ?? "")}</td>
             <td>${escaparHtml(a.orgao ?? "")}</td>
             <td>${formatarData(a.data)}</td>
-            <td>${a.q1 ?? ""}</td>
-            <td>${a.q2 ?? ""}</td>
-            <td>${a.q3 ?? ""}</td>
+            <td>${p1}</td>
+            <td>${p2}</td>
+            <td>${p3}</td>
             <td class="comentario-coluna">${escaparHtml(a.comentario ?? "")}</td>
             <td>${escaparHtml(a.registrado_por ?? "")}</td>
             <td>${badge}</td>
@@ -198,9 +211,9 @@ function montarLinhaHtml(a) {
 
 function aplicarFiltrosTexto(avaliacoes, filtros) {
     return avaliacoes.filter((a) => {
-        const classificacaoQ3 = obterClassificacaoPorQ3(a.q3);
+        const classificacaoDoItem = obterClassificacaoPorItem(a);
 
-        if (filtros.classificacao && classificacaoQ3 !== filtros.classificacao) {
+        if (filtros.classificacao && classificacaoDoItem !== filtros.classificacao) {
             return false;
         }
 
@@ -261,6 +274,7 @@ function renderizarPaginacao() {
     `;
 
     for (let i = 1; i <= totalPaginas; i++) {
+        // AJUSTE: Cor do botão ativo para o Azul Escuro Metrolife (#0a3659)
         html += `
             <button onclick="irParaPagina(${i})"
                 style="
@@ -269,7 +283,7 @@ function renderizarPaginacao() {
                     border:none;
                     border-radius:6px;
                     cursor:pointer;
-                    background:${i === paginaAtual ? "#1f3c88" : "#ddd"};
+                    background:${i === paginaAtual ? "#0a3659" : "#ddd"};
                     color:${i === paginaAtual ? "white" : "#333"};
                     font-weight:${i === paginaAtual ? "bold" : "normal"};
                 ">

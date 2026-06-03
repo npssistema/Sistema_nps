@@ -5,15 +5,18 @@ let chartMedias = null;
 let chartPioresEquipamentos = null;
 let chartPioresOrgaos = null;
 let chartPizza = null;
+let chartRecusasOrgaos = null; // Nova instância do gráfico de recusas
 
 const statusBox = document.getElementById("status-box");
 
 function mostrarStatus(texto, tipo = "info") {
+    if (!statusBox) return;
     statusBox.className = "status-box " + tipo;
     statusBox.textContent = texto;
 }
 
 function esconderStatus() {
+    if (!statusBox) return;
     statusBox.className = "status-box";
     statusBox.textContent = "";
 }
@@ -134,6 +137,7 @@ function destruirGraficos() {
     if (chartMedias) chartMedias.destroy();
     if (chartPioresEquipamentos) chartPioresEquipamentos.destroy();
     if (chartPioresOrgaos) chartPioresOrgaos.destroy();
+    if (chartRecusasOrgaos) chartRecusasOrgaos.destroy(); // Destrói o novo gráfico
 }
 
 function construirLinkHistorico(classificacao = "") {
@@ -160,8 +164,12 @@ function atualizarLinksHistorico() {
 
 function aplicarClassificacaoSeNecessario(lista) {
     return lista.map((item) => {
-        const q3 = Number(item.q3 || 0);
+        // Se recusou responder, não possui classificação de NPS válida
+        if (item.recusou_responder) {
+            return { ...item, classificacao: null };
+        }
 
+        const q3 = Number(item.q3 || 0);
         let classificacao = "detrator";
 
         if (q3 === 3) classificacao = "neutro";
@@ -199,6 +207,7 @@ function calcularTopPioresPorCampo(lista, campo) {
 
 function renderizarComentarios(lista) {
     const container = document.getElementById("comentarios_recentes");
+    if (!container) return;
 
     const comentarios = lista
         .filter((item) => item.comentario && item.comentario.trim() !== "")
@@ -223,30 +232,36 @@ function renderizarComentarios(lista) {
 }
 
 function preencherCardsEMetricas(lista) {
-    const totalAvaliacoes = lista.length;
-    const mediasGerais = lista.map(calcularSatisfacaoGeralItem);
+    const totalGeral = lista.length;
+    
+    // Separa os registros válidos dos que recusaram responder para não estragar a média NPS
+    const listaValidas = lista.filter(item => !item.recusou_responder);
+    const totalValidas = listaValidas.length;
+    const totalRecusadas = lista.filter(item => item.recusou_responder).length;
 
-    const mediaQ1 = media(lista.map((item) => item.q1));
-    const mediaQ2 = media(lista.map((item) => item.q2));
-    const mediaQ3 = media(lista.map((item) => item.q3));
+    const mediasGerais = listaValidas.map(calcularSatisfacaoGeralItem);
+
+    const mediaQ1 = media(listaValidas.map((item) => item.q1));
+    const mediaQ2 = media(listaValidas.map((item) => item.q2));
+    const mediaQ3 = media(listaValidas.map((item) => item.q3));
     const satisfacaoGeral = media(mediasGerais);
 
-    const promotores = lista.filter((item) => item.classificacao === "promotor").length;
-    const neutros = lista.filter((item) => item.classificacao === "neutro").length;
-    const detratores = lista.filter((item) => item.classificacao === "detrator").length;
+    const promotores = listaValidas.filter((item) => item.classificacao === "promotor").length;
+    const neutros = listaValidas.filter((item) => item.classificacao === "neutro").length;
+    const detratores = listaValidas.filter((item) => item.classificacao === "detrator").length;
 
-    const percPromotores = totalAvaliacoes ? (promotores / totalAvaliacoes) * 100 : 0;
-    const percNeutros = totalAvaliacoes ? (neutros / totalAvaliacoes) * 100 : 0;
-    const percDetratores = totalAvaliacoes ? (detratores / totalAvaliacoes) * 100 : 0;
+    const percPromotores = totalValidas ? (promotores / totalValidas) * 100 : 0;
+    const percNeutros = totalValidas ? (neutros / totalValidas) * 100 : 0;
+    const percDetratores = totalValidas ? (detratores / totalValidas) * 100 : 0;
     const nps = percPromotores - percDetratores;
 
     const criticas = mediasGerais.filter((valor) => valor < 3).length;
-    const percCriticas = totalAvaliacoes ? (criticas / totalAvaliacoes) * 100 : 0;
+    const percCriticas = totalValidas ? (criticas / totalValidas) * 100 : 0;
 
     const limite15Dias = new Date();
     limite15Dias.setDate(limite15Dias.getDate() - 15);
 
-    const criticasUltimos15 = lista.filter((item) => {
+    const criticasUltimos15 = listaValidas.filter((item) => {
         const dataItem = new Date(item.data + "T00:00:00");
         return dataItem >= limite15Dias && calcularSatisfacaoGeralItem(item) < 3;
     }).length;
@@ -267,8 +282,14 @@ function preencherCardsEMetricas(lista) {
 
     document.getElementById("perc_criticas").textContent = formatarNumero(percCriticas, 0);
     document.getElementById("criticas_ultimos_15").textContent = String(criticasUltimos15);
-    document.getElementById("total_avaliacoes").textContent = String(totalAvaliacoes);
-    document.getElementById("avaliacoesFeitas").textContent = String(totalAvaliacoes);
+    
+    // Exibe o total geral inserido no sistema (contando com as recusas)
+    document.getElementById("total_avaliacoes").textContent = String(totalGeral);
+    document.getElementById("avaliacoesFeitas").textContent = String(totalGeral);
+
+    // Opcional: Se quiser criar um contador de recusas na tela futuramente
+    const elRecusadas = document.getElementById("total_recusadas");
+    if (elRecusadas) elRecusadas.textContent = String(totalRecusadas);
 }
 
 function renderizarGraficoLinha(lista) {
@@ -279,7 +300,10 @@ function renderizarGraficoLinha(lista) {
     const dadosQ2 = ordenada.map((item) => Number(item.q2 || 0));
     const dadosQ3 = ordenada.map((item) => Number(item.q3 || 0));
 
-    chartLinha = new Chart(document.getElementById("graficoLinha"), {
+    const ctx = document.getElementById("graficoLinha");
+    if (!ctx) return;
+
+    chartLinha = new Chart(ctx, {
         type: "line",
         data: {
             labels,
@@ -326,7 +350,10 @@ function renderizarGraficoMedias(lista) {
         media(lista.map((item) => item.q3))
     ];
 
-    chartMedias = new Chart(document.getElementById("graficoMedias"), {
+    const ctx = document.getElementById("graficoMedias");
+    if (!ctx) return;
+
+    chartMedias = new Chart(ctx, {
         type: "bar",
         data: {
             labels: ["Serviço", "Técnico", "Engenharia Clínica"],
@@ -366,7 +393,10 @@ function renderizarGraficoMedias(lista) {
 function renderizarGraficoPioresEquipamentos(lista) {
     const top = calcularTopPioresPorCampo(lista, "equipamento");
 
-    chartPioresEquipamentos = new Chart(document.getElementById("graficoPioresEquipamentos"), {
+    const ctx = document.getElementById("graficoPioresEquipamentos");
+    if (!ctx) return;
+
+    chartPioresEquipamentos = new Chart(ctx, {
         type: "bar",
         data: {
             labels: top.map((item) => item.nome),
@@ -407,7 +437,10 @@ function renderizarGraficoPioresEquipamentos(lista) {
 function renderizarGraficoPioresOrgaos(lista) {
     const top = calcularTopPioresPorCampo(lista, "orgao");
 
-    chartPioresOrgaos = new Chart(document.getElementById("graficoPioresOrgaos"), {
+    const ctx = document.getElementById("graficoPioresOrgaos");
+    if (!ctx) return;
+
+    chartPioresOrgaos = new Chart(ctx, {
         type: "bar",
         data: {
             labels: top.map((item) => item.nome),
@@ -445,6 +478,57 @@ function renderizarGraficoPioresOrgaos(lista) {
     });
 }
 
+// NOVO GRÁFICO: Identifica os setores que mais recusam responder
+function renderizarGraficoRecusasOrgaos(lista) {
+    const ctx = document.getElementById("graficoRecusasOrgaos");
+    if (!ctx) return;
+
+    // Filtra apenas quem se recusou a responder
+    const listaRecusadas = lista.filter(item => item.recusou_responder);
+
+    const contagemOrgaos = {};
+    listaRecusadas.forEach((item) => {
+        const orgao = (item.orgao || "Não informado").trim() || "Não informado";
+        contagemOrgaos[orgao] = (contagemOrgaos[orgao] || 0) + 1;
+    });
+
+    // Ordena do maior número de recusas para o menor (Top 5)
+    const topRecusas = Object.entries(contagemOrgaos)
+        .map(([nome, total]) => ({ nome, total }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+
+    chartRecusasOrgaos = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: topRecusas.map(item => item.nome),
+            datasets: [{
+                label: "Qtd. de Recusas",
+                data: topRecusas.map(item => item.total),
+                backgroundColor: "#e74c3c", // Cor avermelhada de atenção
+                borderWidth: 1,
+                barThickness: 35
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: "y",
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
 function gerarGraficoPizza() {
     const totalOS = parseInt(document.getElementById("totalOS").value, 10);
     const avaliacoesFeitas = parseInt(document.getElementById("total_avaliacoes").textContent, 10) || 0;
@@ -459,11 +543,14 @@ function gerarGraficoPizza() {
 
     document.getElementById("avaliacoesPendentes").textContent = String(pendentes);
 
+    const ctx = document.getElementById("graficoPizza");
+    if (!ctx) return;
+
     if (chartPizza) {
         chartPizza.destroy();
     }
 
-    chartPizza = new Chart(document.getElementById("graficoPizza"), {
+    chartPizza = new Chart(ctx, {
         type: "pie",
         data: {
             labels: ["Avaliações feitas", "OS sem avaliação"],
@@ -529,10 +616,17 @@ async function carregarGraficos() {
             mostrarStatus("Nenhuma avaliação encontrada para os filtros aplicados.", "info");
         }
 
-        renderizarGraficoLinha(avaliacoes);
-        renderizarGraficoMedias(avaliacoes);
-        renderizarGraficoPioresEquipamentos(avaliacoes);
-        renderizarGraficoPioresOrgaos(avaliacoes);
+        // Divide a lista para renderizar as notas de forma correta
+        const avaliacoesValidas = avaliacoes.filter(item => !item.recusou_responder);
+
+        // Gráficos de Notas baseiam-se em avaliações válidas
+        renderizarGraficoLinha(avaliacoesValidas);
+        renderizarGraficoMedias(avaliacoesValidas);
+        renderizarGraficoPioresEquipamentos(avaliacoesValidas);
+        renderizarGraficoPioresOrgaos(avaliacoesValidas);
+        
+        // Novo gráfico mapeia a lista completa para contabilizar as recusas
+        renderizarGraficoRecusasOrgaos(avaliacoes);
 
     } catch (error) {
         console.error("Erro ao carregar gráficos:", error);
@@ -548,7 +642,7 @@ document.getElementById("form-filtros").addEventListener("submit", async functio
 document.getElementById("btn-limpar").addEventListener("click", async function () {
     document.getElementById("form-filtros").reset();
     classificacaoAtual = "";
-    atualizarBotoesClassificacao();
+    if (typeof atualizarBotoesClassificacao === "function") atualizarBotoesClassificacao();
     await carregarGraficos();
 });
 
@@ -560,7 +654,8 @@ document.querySelectorAll(".btn-classificacao").forEach((botao) => {
     });
 });
 
-document.getElementById("btn-gerar-pizza").addEventListener("click", gerarGraficoPizza);
+const btnPizza = document.getElementById("btn-gerar-pizza");
+if (btnPizza) btnPizza.addEventListener("click", gerarGraficoPizza);
 
 document.addEventListener("DOMContentLoaded", async function () {
     preencherFiltrosComUrl();
