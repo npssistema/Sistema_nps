@@ -393,6 +393,72 @@
         .link-neutro { color: #b8860b; }
         .link-detrator { color: #dc3545; }
 
+        /* Estilo do novo botão de imprimir */
+        .btn-imprimir-graficos {
+            background: #2386c9; /* Azul Claro Metrolife */
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: auto; /* Empurra pro canto direito */
+            transition: 0.2s;
+        }
+
+        .btn-imprimir-graficos:hover {
+            background: #175b8f;
+            transform: translateY(-1px);
+        }
+
+        /* --- MODO DE IMPRESSÃO (ESCONDE O QUE NÃO PRECISA) --- */
+        @media print {
+            body {
+                background: white !important;
+            }
+            
+            /* Esconde cabeçalho, filtros e botões */
+            .header, 
+            .filtro-box, 
+            .btn-voltar, 
+            .footer, 
+            .btn-imprimir-graficos,
+            .btn-gerar-pizza,
+            #totalOS,
+            label[for="totalOS"] {
+                display: none !important;
+            }
+
+            .container {
+                margin-top: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            /* Remove sombras para economizar tinta e evitar bugs visuais */
+            .box, .card, .info-box {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                break-inside: avoid; /* Evita que um gráfico seja cortado ao meio na quebra de página */
+            }
+
+            .grid {
+                display: block !important;
+            }
+
+            .grid .box {
+                margin-bottom: 20px;
+                width: 100%;
+            }
+
+            /* Força os gráficos a ficarem em um tamanho bom no papel */
+            .grafico-container {
+                min-height: auto !important;
+                page-break-inside: avoid;
+            }
+        }
+
         /* --- RESPONSIVIDADE --- */
         @media (max-width: 1200px) {
             .cards { grid-template-columns: repeat(2, 1fr); }
@@ -431,7 +497,8 @@
                 margin-top: 10px;
             }
             .container { margin-top: 180px; padding: 10px; }
-            .top-title { font-size: 20px; align-items: flex-start; }
+            .top-title { font-size: 20px; align-items: flex-start; flex-direction: column; }
+            .btn-imprimir-graficos { margin-left: 0; width: 100%; }
             .filtro-box, .box, .info-box { padding: 15px; border-radius: 12px; }
             .filtro { grid-template-columns: 1fr; gap: 12px; }
             .botoes { grid-column: auto; flex-direction: column; }
@@ -469,6 +536,9 @@
 
     <div class="top-title">
         📊 Análises e Gráficos da Manutenção Corretiva
+        <button onclick="window.print()" class="btn-imprimir-graficos">
+            🖨️ Imprimir Relatório
+        </button>
     </div>
 
     <div class="filtro-box">
