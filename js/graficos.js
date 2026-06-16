@@ -311,25 +311,50 @@ function renderizarGraficoLinha(lista) {
                 {
                     label: "Serviço (P1)",
                     data: dadosQ1,
+                    borderColor: "#2386c9",
+                    backgroundColor: "#2386c9",
                     borderWidth: 3,
+                    borderDash: [], // Linha sólida/contínua
+                    pointStyle: "circle", // Formato da bolinha: Círculo
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     tension: 0.3
                 },
                 {
                     label: "Técnico (P2)",
                     data: dadosQ2,
+                    borderColor: "#198754",
+                    backgroundColor: "#198754",
                     borderWidth: 3,
+                    borderDash: [6, 4], // Linha tracejada (traço de 6px, espaço de 4px)
+                    pointStyle: "rect", // Formato da bolinha: Quadrado
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     tension: 0.3
                 },
                 {
                     label: "Engenharia Clínica (P3)",
                     data: dadosQ3,
+                    borderColor: "#dc3545",
+                    backgroundColor: "#dc3545",
                     borderWidth: 3,
+                    borderDash: [2, 3], // Linha pontilhada curta
+                    pointStyle: "triangle", // Formato da bolinha: Triângulo
+                    pointRadius: 7,
+                    pointHoverRadius: 9,
                     tension: 0.3
                 }
             ]
         },
         options: {
             responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        usePointStyle: true // Altera as caixas da legenda para usar os mesmos símbolos geométricos do gráfico (Facilita muito a impressão P&B!)
+                    }
+                }
+            },
             scales: {
                 y: {
                     min: 0,
@@ -604,7 +629,7 @@ async function carregarGraficos() {
     try {
         esconderStatus();
         atualizarUrlComFiltros();
-        atualizarLinksHistorico();
+        atualLinksHistorico();
 
         const avaliacoes = await buscarAvaliacoes();
 
