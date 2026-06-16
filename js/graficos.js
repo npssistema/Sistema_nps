@@ -314,10 +314,10 @@ function renderizarGraficoLinha(lista) {
                     borderColor: "#2386c9",
                     backgroundColor: "#2386c9",
                     borderWidth: 3,
-                    borderDash: [], // Linha Lisa (Sólida)
-                    pointStyle: "circle", // Símbolo limpo: Círculo
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    borderDash: [], // Linha sólida/contínua
+                    pointStyle: "circle", // Formato da bolinha: Círculo
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     tension: 0.3
                 },
                 {
@@ -326,10 +326,10 @@ function renderizarGraficoLinha(lista) {
                     borderColor: "#198754",
                     backgroundColor: "#198754",
                     borderWidth: 3,
-                    borderDash: [8, 4], // Linha Tracejada Limpa
-                    pointStyle: "circle", // Mantém o círculo para não poluir
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    borderDash: [6, 4], // Linha tracejada (traço de 6px, espaço de 4px)
+                    pointStyle: "rect", // Formato da bolinha: Quadrado
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     tension: 0.3
                 },
                 {
@@ -338,10 +338,10 @@ function renderizarGraficoLinha(lista) {
                     borderColor: "#dc3545",
                     backgroundColor: "#dc3545",
                     borderWidth: 3,
-                    borderDash: [12, 4, 2, 4], // Textura elegante: Traço longo, espaço, ponto, espaço
-                    pointStyle: "circle", // Mantém o círculo uniforme
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    borderDash: [2, 3], // Linha pontilhada curta
+                    pointStyle: "triangle", // Formato da bolinha: Triângulo
+                    pointRadius: 7,
+                    pointHoverRadius: 9,
                     tension: 0.3
                 }
             ]
@@ -351,8 +351,7 @@ function renderizarGraficoLinha(lista) {
             plugins: {
                 legend: {
                     labels: {
-                        boxWidth: 40, // Aumenta a largura da caixinha na legenda para a textura da linha aparecer bem
-                        usePointStyle: false // Força a legenda a mostrar a linha texturizada em vez de um ponto
+                        usePointStyle: true // Altera as caixas da legenda para usar os mesmos símbolos geométricos do gráfico (Facilita muito a impressão P&B!)
                     }
                 }
             },
@@ -630,7 +629,7 @@ async function carregarGraficos() {
     try {
         esconderStatus();
         atualizarUrlComFiltros();
-        atualizarLinksHistorico();
+        atualLinksHistorico();
 
         const avaliacoes = await buscarAvaliacoes();
 
