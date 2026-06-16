@@ -629,7 +629,7 @@ async function carregarGraficos() {
     try {
         esconderStatus();
         atualizarUrlComFiltros();
-        atualLinksHistorico();
+        atualizarLinksHistorico(); // CORRIGIDO AQUI!
 
         const avaliacoes = await buscarAvaliacoes();
 
