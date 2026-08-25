@@ -4,72 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histórico de Avaliações - Metrolife</title>
-
     <style>
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; padding: 0; }
-
-        .header {
-            background: #ffffff;
-            color: #0a3659; 
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: fixed;
-            top: 0; left: 0; width: 100%;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-bottom: 4px solid #2386c9; 
-        }
-
+        .header { background: #ffffff; color: #0a3659; padding: 12px 20px; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 4px solid #2386c9; }
         .header .logo { height: 55px; margin-right: 25px; object-fit: contain; }
-        
-        .header .header-title {
-            font-size: 20px; font-weight: bold;
-            border-left: 2px solid #2386c9; 
-            padding-left: 25px; line-height: 1.2;
-        }
-
-        .btn-sair {
-            position: absolute;
-            right: 20px;
-            background: #dc3545; color: white;
-            border: none; padding: 8px 16px; border-radius: 6px;
-            cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;
-        }
+        .header .header-title { font-size: 20px; font-weight: bold; border-left: 2px solid #2386c9; padding-left: 25px; line-height: 1.2; }
+        .btn-sair { position: absolute; right: 20px; background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .btn-sair:hover { background: #c82333; }
-
-        .container {
-            max-width: 1280px;
-            margin: 120px auto 30px auto; 
-            background: white; padding: 25px; border-radius: 14px;
-            box-shadow: 0 0 18px rgba(0, 0, 0, 0.08);
-        }
-
+        .container { max-width: 1280px; margin: 120px auto 30px auto; background: white; padding: 25px; border-radius: 14px; box-shadow: 0 0 18px rgba(0, 0, 0, 0.08); }
         .filtro-box { background: #f8faff; border: 1px solid #dbe3f3; padding: 20px; border-radius: 14px; margin-bottom: 30px; }
         .filtro-title { font-size: 16px; font-weight: bold; color: #0a3659; margin-bottom: 15px; }
+        
+        .filtros-rapidos-container { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 5px; }
+        .btn-rapido { background: #f8faff; border: 1px solid #2386c9; color: #2386c9; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-rapido:hover { background: #2386c9; color: white; }
+
         .filtro { display: grid; grid-template-columns: repeat(4, 1fr) 220px; gap: 16px; align-items: stretch; }
         .campo { display: flex; flex-direction: column; width: 100%; }
         label { font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #444; }
-        
-        input[type="text"], input[type="date"] {
-            width: 100%; height: 44px; padding: 10px 12px; font-size: 14px;
-            border: 1px solid #cfcfcf; border-radius: 10px; outline: none; background: white; transition: all 0.3s ease;
-        }
+        input[type="text"], input[type="date"] { width: 100%; height: 44px; padding: 10px 12px; font-size: 14px; border: 1px solid #cfcfcf; border-radius: 10px; outline: none; background: white; transition: all 0.3s ease; }
         input:focus { border-color: #2386c9; box-shadow: 0 0 6px rgba(35, 134, 201, 0.25); }
-
         .botoes { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         .btn { height: 44px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; transition: 0.2s; }
         .btn-filtrar { background: #2386c9; color: white; }
         .btn-limpar { background: #6c757d; color: white; }
         .btn-voltar { background: #0a3659; color: white; margin-top: 30px; width: 100%; height: 45px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-weight: bold; border-radius: 10px; transition: 0.2s; }
-        .btn-excluir { background: #dc3545; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: bold; min-width: 90px; transition: 0.2s; }
-        .btn-excluir:hover, .btn:hover, .btn-voltar:hover { opacity: 0.85; transform: translateY(-1px); }
+        
+        .btn-editar { background: #2386c9; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn-excluir { background: #dc3545; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn-editar:hover, .btn-excluir:hover, .btn:hover, .btn-voltar:hover { opacity: 0.85; transform: translateY(-1px); }
 
         .filtro-classificacao { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
         .btn-classificacao { padding: 10px 16px; border: 1px solid transparent; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none; color: #222; display: inline-block; transition: 0.2s; background: white; }
-        .btn-classificacao:hover { transform: translateY(-1px); }
         .btn-promotor { background: #d4edda; border-color: #b7dfc2; }
         .btn-neutro { background: #fff3cd; border-color: #f0df9d; }
         .btn-detrator { background: #f8d7da; border-color: #e8b8be; }
@@ -131,11 +98,17 @@
 </div>
 
 <div class="container">
-
     <div class="filtro-box">
         <div class="filtro-title">🔍 Filtros de Pesquisa</div>
         <form id="form-filtros">
             <div class="filtro">
+                <div class="filtros-rapidos-container">
+                    <span style="font-size: 13px; font-weight: bold; color: #444; margin-right: 5px;">Atalhos de data:</span>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('hoje')">Hoje</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('7dias')">Últimos 7 dias</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('30dias')">Últimos 30 dias</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('ano')">Este Ano</button>
+                </div>
                 <div class="campo"><label>Número da OS</label><input type="text" id="filtro_os"></div>
                 <div class="campo"><label>Data inicial</label><input type="date" id="filtro_data_inicio"></div>
                 <div class="campo"><label>Data final</label><input type="date" id="filtro_data_fim"></div>
@@ -144,13 +117,11 @@
                 <div class="campo"><label>Modelo</label><input type="text" id="filtro_modelo"></div>
                 <div class="campo"><label>Localização</label><input type="text" id="filtro_localizacao"></div>
                 <div class="campo"><label>Órgão</label><input type="text" id="filtro_orgao"></div>
-
                 <div class="botoes">
                     <button type="submit" class="btn btn-filtrar">🔍 Filtrar</button>
                     <button type="button" class="btn btn-limpar" id="btn-limpar">🧹 Limpar</button>
                 </div>
             </div>
-
             <div class="filtro-classificacao">
                 <button type="button" class="btn-classificacao btn-todos ativo" data-classificacao="">Todos</button>
                 <button type="button" class="btn-classificacao btn-promotor" data-classificacao="promotor">Promotores</button>
@@ -178,6 +149,7 @@
     <a href="index.html" class="btn-voltar">Voltar para Home</a>
 </div>
 
+<!-- MODAL DE EXCLUSÃO -->
 <div id="modalExcluir" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">⚠ Confirmar Exclusão</div>
@@ -189,11 +161,33 @@
     </div>
 </div>
 
-<!-- CADEADO DE SEGURANÇA E SCRIPTS DA PÁGINA -->
+<!-- MODAL DE EDIÇÃO -->
+<div id="modalEditar" class="modal-overlay">
+    <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-header" style="background: #2386c9;">✏️ Editar Avaliação</div>
+        <div class="modal-body" style="text-align: left;">
+            <form id="form-editar">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="campo"><label>Nº OS</label><input type="text" id="edit_os" required></div>
+                    <div class="campo"><label>Equipamento</label><input type="text" id="edit_equipamento" required></div>
+                    <div class="campo"><label>Marca</label><input type="text" id="edit_marca"></div>
+                    <div class="campo"><label>Modelo</label><input type="text" id="edit_modelo"></div>
+                    <div class="campo"><label>Localização</label><input type="text" id="edit_localizacao"></div>
+                    <div class="campo"><label>Órgão</label><input type="text" id="edit_orgao"></div>
+                    <div class="campo" style="grid-column: span 2;"><label>Comentário</label><input type="text" id="edit_comentario"></div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn" style="background: #2386c9; color: white;" onclick="salvarEdicao()" id="salvarEdicaoBtn">Salvar Alterações</button>
+            <button type="button" class="modal-btn modal-btn-cancelar" onclick="fecharModalEdicao()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/historico.js"></script>
-
 </body>
 </html>

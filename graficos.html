@@ -4,498 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Metrolife Engenharia Clínica</title>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        /* PALETA METROLIFE:
-           Azul Escuro: #0a3659
-           Azul Claro: #2386c9 
-        */
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #eef2f7; margin: 0; padding: 0; }
+        .header { background: #ffffff; color: #0a3659; padding: 12px 20px; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 4px solid #2386c9; }
+        .header .logo { height: 55px; margin-right: 25px; object-fit: contain; }
+        .header .header-title { font-size: 20px; font-weight: bold; border-left: 2px solid #2386c9; padding-left: 25px; line-height: 1.2; }
+        .btn-sair { position: absolute; right: 20px; background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .btn-sair:hover { background: #c82333; }
+        .container { max-width: 1280px; margin: 120px auto 25px auto; padding: 15px; }
+        .top-title { font-size: 24px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; line-height: 1.3; color: #0a3659; }
+        .filtro-box { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 0 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .filtro-title { font-size: 16px; font-weight: bold; color: #0a3659; margin-bottom: 15px; }
+        
+        .filtros-rapidos-container { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 5px; }
+        .btn-rapido { background: #f8faff; border: 1px solid #2386c9; color: #2386c9; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-rapido:hover { background: #2386c9; color: white; }
 
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #eef2f7; /* Fundo levemente mais frio para combinar com o azul */
-            margin: 0;
-            padding: 0;
-        }
-
-        /* --- NOVO CABEÇALHO METROLIFE --- */
-        .header {
-            background: #ffffff;
-            color: #0a3659;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-bottom: 4px solid #2386c9; /* Detalhe em azul claro */
-        }
-
-        .header .logo {
-            height: 55px; /* Altura da logo */
-            margin-right: 25px;
-            object-fit: contain;
-        }
-
-        .header .header-title {
-            font-size: 20px;
-            font-weight: bold;
-            border-left: 2px solid #2386c9; /* Linha divisória inspirada no banner */
-            padding-left: 25px;
-            line-height: 1.2;
-        }
-
-        /* Botão de sair no canto direito */
-        .btn-sair {
-            position: absolute;
-            right: 20px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .btn-sair:hover {
-            background: #c82333;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 120px auto 25px auto; /* Ajustado para o novo header */
-            padding: 15px;
-        }
-
-        .top-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            line-height: 1.3;
-            color: #0a3659;
-        }
-
-        .filtro-box {
-            background: white;
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-        }
-
-        .filtro-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #0a3659; /* Azul Escuro Metrolife */
-            margin-bottom: 15px;
-        }
-
-        .filtro {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr) 220px;
-            gap: 16px;
-        }
-
-        .campo {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        label {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #444;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        input[type="number"] {
-            width: 100%;
-            height: 44px;
-            padding: 10px 12px;
-            font-size: 14px;
-            border: 1px solid #cfcfcf;
-            border-radius: 10px;
-            outline: none;
-            background: white;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            border-color: #2386c9;
-            box-shadow: 0 0 6px rgba(35, 134, 201, 0.25);
-        }
-
-        .botoes {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .btn {
-            height: 44px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            width: 100%;
-            transition: 0.2s;
-        }
-
-        .btn-filtrar {
-            background: #2386c9; /* Azul Claro Metrolife */
-            color: white;
-        }
-
-        .btn-limpar {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-voltar {
-            background: #0a3659; /* Azul Escuro Metrolife */
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            font-size: 15px;
-            margin-top: 20px;
-            text-decoration: none;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            transition: 0.2s;
-        }
-
-        .btn-gerar-pizza {
-            background: #2386c9; /* Azul Claro Metrolife */
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            width: 100%;
-            margin-top: 10px;
-            transition: 0.2s;
-        }
-
-        .btn:hover,
-        .btn-voltar:hover,
-        .btn-gerar-pizza:hover {
-            opacity: 0.85;
-            transform: translateY(-1px);
-        }
-
-        .filtro-classificacao {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 18px;
-        }
-
-        .btn-classificacao {
-            padding: 10px 16px;
-            border: 1px solid transparent;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            text-decoration: none;
-            color: #222;
-            background: white;
-            transition: 0.2s;
-        }
-
-        .btn-promotor {
-            background: #d4edda;
-            border-color: #b7dfc2;
-        }
-
-        .btn-neutro {
-            background: #fff3cd;
-            border-color: #f0df9d;
-        }
-
-        .btn-detrator {
-            background: #f8d7da;
-            border-color: #e8b8be;
-        }
-
-        .btn-todos {
-            background: #e2e3e5;
-            border-color: #cfd2d6;
-        }
-
-        .ativo {
-            box-shadow: 0 0 0 3px rgba(35, 134, 201, 0.3); /* Destaque no azul claro */
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 14px;
-            padding: 18px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.08);
-            text-align: center;
-            border-bottom: 3px solid #2386c9; /* Detalhe azul nos cards */
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            color: #444;
-        }
-
-        .card-value {
-            font-size: 34px;
-            font-weight: bold;
-            color: #0a3659; /* Azul Escuro Metrolife */
-        }
-
-        .info-box {
-            background: white;
-            border-radius: 14px;
-            padding: 18px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 18px;
-            margin-bottom: 20px;
-        }
-
-        .box {
-            background: white;
-            border-radius: 14px;
-            padding: 18px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.08);
-            overflow-x: auto;
-        }
-
-        .box h3 {
-            margin-top: 0;
-            font-size: 18px;
-            margin-bottom: 12px;
-            line-height: 1.3;
-            color: #0a3659;
-        }
-
-        .grafico-container {
-            position: relative;
-            width: 100%;
-            min-height: 350px;
-        }
-
-        canvas {
-            max-width: 100%;
-        }
-
-        .comentarios-lista {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .comentario-card {
-            background: #f9f9f9;
-            padding: 12px;
-            border-radius: 10px;
-            border-left: 5px solid #0a3659; /* Azul Escuro Metrolife */
-        }
-
-        .comentario-meta {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .comentario-texto {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #222;
-            word-break: break-word;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            padding: 20px;
-            color: #666;
-            font-size: 13px;
-        }
-
-        .status-box {
-            display: none;
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        .status-box.erro {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #e8b8be;
-        }
-
-        .status-box.info {
-            display: block;
-            background: #e7f3ff;
-            color: #084298;
-            border: 1px solid #b6d4fe;
-        }
-
-        .link-filtro {
-            text-decoration: none;
-            font-weight: bold;
-        }
-
+        .filtro { display: grid; grid-template-columns: repeat(4, 1fr) 220px; gap: 16px; }
+        .campo { display: flex; flex-direction: column; width: 100%; }
+        label { font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #444; }
+        input[type="text"], input[type="date"], input[type="month"], input[type="number"] { width: 100%; height: 44px; padding: 10px 12px; font-size: 14px; border: 1px solid #cfcfcf; border-radius: 10px; outline: none; background: white; transition: all 0.3s ease; }
+        input:focus { border-color: #2386c9; box-shadow: 0 0 6px rgba(35, 134, 201, 0.25); }
+        .botoes { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .btn { height: 44px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn-filtrar { background: #2386c9; color: white; }
+        .btn-limpar { background: #6c757d; color: white; }
+        .btn-voltar { background: #0a3659; color: white; padding: 12px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; width: 100%; font-size: 15px; margin-top: 20px; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .btn-gerar-pizza { background: #2386c9; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 14px; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn:hover, .btn-voltar:hover, .btn-gerar-pizza:hover { opacity: 0.85; transform: translateY(-1px); }
+        .filtro-classificacao { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+        .btn-classificacao { padding: 10px 16px; border: 1px solid transparent; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none; color: #222; background: white; transition: 0.2s; }
+        .btn-promotor { background: #d4edda; border-color: #b7dfc2; }
+        .btn-neutro { background: #fff3cd; border-color: #f0df9d; }
+        .btn-detrator { background: #f8d7da; border-color: #e8b8be; }
+        .btn-todos { background: #e2e3e5; border-color: #cfd2d6; }
+        .ativo { box-shadow: 0 0 0 3px rgba(35, 134, 201, 0.3); }
+        .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 0 10px rgba(0,0,0,0.08); text-align: center; border-bottom: 3px solid #2386c9; }
+        .card-title { font-size: 15px; font-weight: bold; margin-bottom: 12px; color: #444; }
+        .card-value { font-size: 34px; font-weight: bold; color: #0a3659; }
+        .info-box { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 0 10px rgba(0,0,0,0.08); margin-bottom: 20px; font-size: 14px; line-height: 1.8; }
+        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 20px; }
+        .box { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 0 10px rgba(0,0,0,0.08); overflow-x: auto; }
+        .box h3 { margin-top: 0; font-size: 18px; margin-bottom: 12px; line-height: 1.3; color: #0a3659; }
+        .grafico-container { position: relative; width: 100%; min-height: 350px; }
+        canvas { max-width: 100%; }
+        .comentarios-lista { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .comentario-card { background: #f9f9f9; padding: 12px; border-radius: 10px; border-left: 5px solid #0a3659; }
+        .comentario-meta { font-size: 13px; color: #666; margin-bottom: 5px; }
+        .comentario-texto { font-size: 14px; line-height: 1.6; color: #222; word-break: break-word; }
+        .footer { text-align: center; margin-top: 25px; padding: 20px; color: #666; font-size: 13px; }
+        .status-box { display: none; margin-top: 15px; padding: 12px; border-radius: 10px; font-size: 14px; }
+        .status-box.erro { display: block; background: #f8d7da; color: #721c24; border: 1px solid #e8b8be; }
+        .status-box.info { display: block; background: #e7f3ff; color: #084298; border: 1px solid #b6d4fe; }
+        .link-filtro { text-decoration: none; font-weight: bold; }
         .link-promotor { color: #198754; }
         .link-neutro { color: #b8860b; }
         .link-detrator { color: #dc3545; }
-
-        /* Estilo do novo botão de imprimir */
-        .btn-imprimir-graficos {
-            background: #2386c9; /* Azul Claro Metrolife */
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            margin-left: auto; /* Empurra pro canto direito */
-            transition: 0.2s;
-        }
-
-        .btn-imprimir-graficos:hover {
-            background: #175b8f;
-            transform: translateY(-1px);
-        }
-
-        /* --- MODO DE IMPRESSÃO (ESCONDE O QUE NÃO PRECISA) --- */
+        .btn-imprimir-graficos { background: #2386c9; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-left: auto; transition: 0.2s; }
+        .btn-imprimir-graficos:hover { background: #175b8f; transform: translateY(-1px); }
+        
         @media print {
-            body {
-                background: white !important;
-            }
-            
-            /* Esconde cabeçalho, filtros e botões */
-            .header, 
-            .filtro-box, 
-            .btn-voltar, 
-            .footer, 
-            .btn-imprimir-graficos,
-            .btn-gerar-pizza,
-            #totalOS,
-            label[for="totalOS"] {
-                display: none !important;
-            }
-
-            .container {
-                margin-top: 0 !important;
-                padding: 0 !important;
-                max-width: 100% !important;
-            }
-
-            /* Remove sombras para economizar tinta e evitar bugs visuais */
-            .box, .card, .info-box {
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-                break-inside: avoid; /* Evita que um gráfico seja cortado ao meio na quebra de página */
-            }
-
-            .grid {
-                display: block !important;
-            }
-
-            .grid .box {
-                margin-bottom: 20px;
-                width: 100%;
-            }
-
-            /* Força os gráficos a ficarem em um tamanho bom no papel */
-            .grafico-container {
-                min-height: auto !important;
-                page-break-inside: avoid;
-            }
+            body { background: white !important; }
+            .header, .filtro-box, .btn-voltar, .footer, .btn-imprimir-graficos, .no-print { display: none !important; }
+            .container { margin-top: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            .box, .card, .info-box { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; }
+            .grid { display: block !important; }
+            .grid .box { margin-bottom: 20px; width: 100%; }
+            .grafico-container { min-height: auto !important; page-break-inside: avoid; }
         }
-
-        /* --- RESPONSIVIDADE --- */
-        @media (max-width: 1200px) {
-            .cards { grid-template-columns: repeat(2, 1fr); }
-            .grid { grid-template-columns: 1fr; }
-            .filtro { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        @media (max-width: 900px) {
-            .filtro { grid-template-columns: repeat(2, 1fr); }
-            .botoes { grid-column: span 2; flex-direction: row; }
-        }
-
+        @media (max-width: 1200px) { .cards { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } .filtro { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 900px) { .filtro { grid-template-columns: repeat(2, 1fr); } .botoes { grid-column: span 2; flex-direction: row; } }
         @media (max-width: 700px) {
-            .header {
-                flex-direction: column;
-                padding: 15px 10px;
-            }
-            .header .logo {
-                margin-right: 0;
-                margin-bottom: 10px;
-                height: 45px;
-            }
-            .header .header-title {
-                border-left: none;
-                border-top: 2px solid #2386c9;
-                padding-left: 0;
-                padding-top: 10px;
-                text-align: center;
-                font-size: 17px;
-                margin-bottom: 15px;
-            }
-            .btn-sair {
-                position: relative;
-                right: 0;
-                width: 100%;
-                margin-top: 10px;
-            }
+            .header { flex-direction: column; padding: 15px 10px; }
+            .header .logo { margin-right: 0; margin-bottom: 10px; height: 45px; }
+            .header .header-title { border-left: none; border-top: 2px solid #2386c9; padding-left: 0; padding-top: 10px; text-align: center; font-size: 17px; margin-bottom: 15px; }
+            .btn-sair { position: relative; right: 0; width: 100%; margin-top: 10px; }
             .container { margin-top: 180px; padding: 10px; }
             .top-title { font-size: 20px; align-items: flex-start; flex-direction: column; }
             .btn-imprimir-graficos { margin-left: 0; width: 100%; }
@@ -511,11 +97,10 @@
             .btn-classificacao { width: 100%; text-align: center; }
             .box h3 { font-size: 16px; }
         }
-
         @media (max-width: 420px) {
             .container { margin-top: 170px; padding: 8px; }
             .top-title { font-size: 18px; }
-            input[type="text"], input[type="date"], input[type="number"], .btn, .btn-gerar-pizza, .btn-voltar, .btn-classificacao { font-size: 13px; }
+            input[type="text"], input[type="date"], input[type="month"], input[type="number"], .btn, .btn-gerar-pizza, .btn-voltar, .btn-classificacao { font-size: 13px; }
             .card-title { font-size: 14px; }
             .card-value { font-size: 28px; }
             .grafico-container { min-height: 260px; }
@@ -523,239 +108,109 @@
         }
     </style>
 </head>
-
 <body>
-
 <div class="header">
     <img src="logo.png" alt="Metrolife Eletromedicina" class="logo">
     <div class="header-title">Sistema de Avaliação da Manutenção Corretiva</div>
     <button class="btn-sair" onclick="fazerLogout()">Sair</button>
 </div>
-
 <div class="container">
-
     <div class="top-title">
         📊 Análises e Gráficos da Manutenção Corretiva
-        <button onclick="window.print()" class="btn-imprimir-graficos">
-            🖨️ Imprimir Relatório
-        </button>
+        <button onclick="window.print()" class="btn-imprimir-graficos">🖨️ Imprimir Relatório</button>
     </div>
-
     <div class="filtro-box">
         <div class="filtro-title">🔍 Filtros de Pesquisa</div>
-
         <form id="form-filtros">
             <div class="filtro">
-                <div class="campo">
-                    <label for="filtro_equipamento">Equipamento</label>
-                    <input type="text" id="filtro_equipamento" name="equipamento">
+                <div class="filtros-rapidos-container">
+                    <span style="font-size: 13px; font-weight: bold; color: #444; margin-right: 5px;">Atalhos de data:</span>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('hoje')">Hoje</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('7dias')">Últimos 7 dias</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('30dias')">Últimos 30 dias</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('mes_atual')">Este Mês</button>
+                    <button type="button" class="btn-rapido" onclick="aplicarFiltroRapido('ano')">Este Ano</button>
                 </div>
-
-                <div class="campo">
-                    <label for="filtro_marca">Marca</label>
-                    <input type="text" id="filtro_marca" name="marca">
-                </div>
-
-                <div class="campo">
-                    <label for="filtro_modelo">Modelo</label>
-                    <input type="text" id="filtro_modelo" name="modelo">
-                </div>
-
-                <div class="campo">
-                    <label for="filtro_orgao">Órgão</label>
-                    <input type="text" id="filtro_orgao" name="orgao">
-                </div>
-
-                <div class="campo">
-                    <label for="filtro_localizacao">Localização</label>
-                    <input type="text" id="filtro_localizacao" name="localizacao">
-                </div>
-
-                <div class="campo">
-                    <label for="filtro_data_inicio">Data inicial</label>
-                    <input type="date" id="filtro_data_inicio" name="data_inicio">
-                </div>
-
-                <div class="campo">
-                    <label for="filtro_data_fim">Data final</label>
-                    <input type="date" id="filtro_data_fim" name="data_fim">
-                </div>
-
+                
+                <div class="campo"><label for="filtro_equipamento">Equipamento</label><input type="text" id="filtro_equipamento" name="equipamento"></div>
+                <div class="campo"><label for="filtro_marca">Marca</label><input type="text" id="filtro_marca" name="marca"></div>
+                <div class="campo"><label for="filtro_modelo">Modelo</label><input type="text" id="filtro_modelo" name="modelo"></div>
+                <div class="campo"><label for="filtro_orgao">Órgão</label><input type="text" id="filtro_orgao" name="orgao"></div>
+                <div class="campo"><label for="filtro_localizacao">Localização</label><input type="text" id="filtro_localizacao" name="localizacao"></div>
+                <div class="campo"><label for="filtro_data_inicio">Data inicial</label><input type="date" id="filtro_data_inicio" name="data_inicio"></div>
+                <div class="campo"><label for="filtro_data_fim">Data final</label><input type="date" id="filtro_data_fim" name="data_fim"></div>
+                <div class="campo"><label for="filtro_mes">Mês Específico</label><input type="month" id="filtro_mes" name="mes"></div>
                 <div class="botoes">
                     <button type="submit" class="btn btn-filtrar">🔍 Filtrar</button>
                     <button type="button" class="btn btn-limpar" id="btn-limpar">🧹 Limpar</button>
                 </div>
             </div>
-
             <div class="filtro-classificacao">
-                <button type="button" class="btn-classificacao btn-todos ativo" data-classificacao="">
-                    Todos
-                </button>
-
-                <button type="button" class="btn-classificacao btn-promotor" data-classificacao="promotor">
-                    Promotores
-                </button>
-
-                <button type="button" class="btn-classificacao btn-neutro" data-classificacao="neutro">
-                    Neutros
-                </button>
-
-                <button type="button" class="btn-classificacao btn-detrator" data-classificacao="detrator">
-                    Detratores
-                </button>
+                <button type="button" class="btn-classificacao btn-todos ativo" data-classificacao="">Todos</button>
+                <button type="button" class="btn-classificacao btn-promotor" data-classificacao="promotor">Promotores</button>
+                <button type="button" class="btn-classificacao btn-neutro" data-classificacao="neutro">Neutros</button>
+                <button type="button" class="btn-classificacao btn-detrator" data-classificacao="detrator">Detratores</button>
             </div>
         </form>
-
         <div id="status-box" class="status-box"></div>
     </div>
-
     <div class="cards">
-        <div class="card">
-            <div class="card-title" title="Média Geral das Questões">⭐ Satisfação Geral</div>
-            <div class="card-value" id="satisfacao_geral">0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title" title="Média da Questão 1">🛠 Serviço</div>
-            <div class="card-value" id="media_q1">0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title" title="Média da Questão 2">👨‍🔧 Técnico</div>
-            <div class="card-value" id="media_q2">0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title" title="Média da Questão 3">🏥 Engenharia Clínica</div>
-            <div class="card-value" id="media_q3">0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title" title="Net Promoter Score = Promotores - Detratores">📌 NPS</div>
-            <div class="card-value" id="nps">0</div>
-        </div>
+        <div class="card"><div class="card-title" title="Média Geral das Questões">⭐ Satisfação Geral</div><div class="card-value" id="satisfacao_geral">0,00</div></div>
+        <div class="card"><div class="card-title" title="Média da Questão 1">🛠 Serviço</div><div class="card-value" id="media_q1">0,00</div></div>
+        <div class="card"><div class="card-title" title="Média da Questão 2">👨‍🔧 Técnico</div><div class="card-value" id="media_q2">0,00</div></div>
+        <div class="card"><div class="card-title" title="Média da Questão 3">🏥 Engenharia Clínica</div><div class="card-value" id="media_q3">0,00</div></div>
+        <div class="card"><div class="card-title" title="Net Promoter Score = Promotores - Detratores">📌 NPS</div><div class="card-value" id="nps">0</div></div>
     </div>
-
     <div class="info-box">
         <b>NPS Detalhado:</b>
-
-        <a href="#" class="link-filtro link-promotor" id="link_promotores">
-            Promotores: <span id="perc_promotores">0</span>%
-        </a>
-
-        |
-
-        <a href="#" class="link-filtro link-neutro" id="link_neutros">
-            Neutros: <span id="perc_neutros">0</span>%
-        </a>
-
-        |
-
-        <a href="#" class="link-filtro link-detrator" id="link_detratores">
-            Detratores: <span id="perc_detratores">0</span>%
-        </a>
-
-        <br><br>
-        <b>Última avaliação:</b> <span id="ultima_avaliacao">-</span>
+        <a href="#" class="link-filtro link-promotor" id="link_promotores">Promotores: <span id="perc_promotores">0</span>%</a> |
+        <a href="#" class="link-filtro link-neutro" id="link_neutros">Neutros: <span id="perc_neutros">0</span>%</a> |
+        <a href="#" class="link-filtro link-detrator" id="link_detratores">Detratores: <span id="perc_detratores">0</span>%</a>
+        <br><br><b>Última avaliação:</b> <span id="ultima_avaliacao">-</span>
     </div>
-
     <div class="grid">
-        <div class="box">
-            <h3>📈 Evolução das Notas ao Longo do Tempo</h3>
-            <canvas id="graficoLinha"></canvas>
-        </div>
-
-        <div class="box">
-            <h3>📊 Comparação das Médias</h3>
-            <div class="grafico-container">
-                <canvas id="graficoMedias"></canvas>
-            </div>
-        </div>
+        <div class="box"><h3>📈 Evolução das Notas ao Longo do Tempo</h3><canvas id="graficoLinha"></canvas></div>
+        <div class="box"><h3>📊 Comparação das Médias</h3><div class="grafico-container"><canvas id="graficoMedias"></canvas></div></div>
     </div>
-
     <div class="grid">
-        <div class="box">
-            <h3>📉 5 Equipamentos com Piores Críticas</h3>
-            <div class="grafico-container">
-                <canvas id="graficoPioresEquipamentos"></canvas>
-            </div>
-        </div>
-
-        <div class="box">
+        <div class="box"><h3>📉 5 Equipamentos com Piores Críticas</h3><div class="grafico-container"><canvas id="graficoPioresEquipamentos"></canvas></div></div>
+        <div class="box no-print">
             <h3>📌 Gráfico de Avaliações por Ordem de Serviço</h3>
-
             <label for="totalOS">Digite o total de ordens de serviços:</label>
             <input type="number" id="totalOS" name="totalOS" placeholder="Ex: 150">
-
-            <button class="btn-gerar-pizza" id="btn-gerar-pizza" type="button">
-                Gerar Gráfico
-            </button>
-
-            <p style="margin-top: 12px; font-size: 14px; color: #444;">
-                <b>Avaliações feitas:</b> <span id="avaliacoesFeitas">0</span><br>
-                <b>OS sem avaliação:</b> <span id="avaliacoesPendentes">-</span>
-            </p>
-
+            <button class="btn-gerar-pizza" id="btn-gerar-pizza" type="button">Gerar Gráfico</button>
+            <p style="margin-top: 12px; font-size: 14px; color: #444;"><b>Avaliações feitas:</b> <span id="avaliacoesFeitas">0</span><br><b>OS sem avaliação:</b> <span id="avaliacoesPendentes">-</span></p>
             <canvas id="graficoPizza"></canvas>
         </div>
     </div>
-
     <div class="grid">
-        <div class="box">
-            <h3>🏥 5 Órgãos com Piores Críticas</h3>
-            <div class="grafico-container">
-                <canvas id="graficoPioresOrgaos"></canvas>
-            </div>
-        </div>
-
+        <div class="box"><h3>🏥 5 Órgãos com Piores Críticas</h3><div class="grafico-container"><canvas id="graficoPioresOrgaos"></canvas></div></div>
         <div class="box">
             <h3>⚠ Alertas de Atenção</h3>
             <p style="font-size: 14px; line-height: 1.9;">
-                🔴 <b><span id="perc_criticas">0</span>%</b> das avaliações tiveram notas menores que 3 na Satisfação Geral.
-                <br>
-                ⏳ Avaliações críticas nos últimos 15 dias: <b><span id="criticas_ultimos_15">0</span></b>
-                <br>
+                🔴 <b><span id="perc_criticas">0</span>%</b> das avaliações tiveram notas menores que 3 na Satisfação Geral.<br>
+                ⏳ Avaliações críticas nos últimos 15 dias: <b><span id="criticas_ultimos_15">0</span></b><br>
                 📌 Total de avaliações no período: <b><span id="total_avaliacoes">0</span></b>
             </p>
         </div>
     </div>
-
     <div class="grid">
-        <div class="box">
-            <h3>🚫 Setores com Maior Índice de Recusa</h3>
-            <div class="grafico-container">
-                <canvas id="graficoRecusasOrgaos"></canvas>
-            </div>
-        </div>
-
+        <div class="box"><h3>🚫 Órgãos com Maior Índice de Recusa</h3><div class="grafico-container"><canvas id="graficoRecusasOrgaos"></canvas></div></div>
         <div class="box">
             <h3>📉 Resumo de Recusas</h3>
-            <p style="font-size: 14px; line-height: 1.9; margin-top: 10px;">
-                Total de Ordens de Serviço preenchidas em que o setor se <b>recusou a responder</b> a avaliação:
-                <br><br>
-                <span style="font-size: 42px; font-weight: bold; color: #dc3545; display: block; text-align: center;" id="total_recusadas">0</span>
-            </p>
+            <p style="font-size: 14px; line-height: 1.9; margin-top: 10px;">Total de Ordens de Serviço preenchidas em que o setor se <b>recusou a responder</b> a avaliação:<br><br><span style="font-size: 42px; font-weight: bold; color: #dc3545; display: block; text-align: center;" id="total_recusadas">0</span></p>
         </div>
     </div>
-
     <div class="box" style="margin-bottom: 20px;">
         <h3>💬 Comentários e Sugestões Recentes</h3>
         <div id="comentarios_recentes" class="comentarios-lista"></div>
     </div>
-
     <a href="index.html" class="btn-voltar">Voltar para Home</a>
-
-    <div class="footer">
-        Sistema de Avaliação da Metrolife Engenharia Clínica <br>
-        Criado por Patrick Carneiro, João Victor Guimarães e Júlia Miranda
-    </div>
-
+    <div class="footer">Sistema de Avaliação da Metrolife Engenharia Clínica <br>Criado por Patrick Carneiro, João Victor Guimarães e Júlia Miranda</div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/graficos.js"></script>
-
 </body>
 </html>

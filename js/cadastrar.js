@@ -12,7 +12,6 @@ function limparMensagem() {
 
 function calcularClassificacao(q1, q2, q3) {
     const media = (Number(q1) + Number(q2) + Number(q3)) / 3;
-
     if (media >= 4) return "promotor";
     if (media >= 3) return "neutro";
     return "detrator";
@@ -30,7 +29,6 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
     const osNumero = form.os_numero.value.trim();
 
     try {
-        // 1. Verificação de OS duplicada
         const { data: osExistente, error: erroBusca } = await supabaseClient
             .from("avaliacoes")
             .select("id")
@@ -52,7 +50,6 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
             return;
         }
 
-        // 2. Captura do estado de recusa e montagem dos dados
         const recusouResponder = form.recusou_responder ? form.recusou_responder.checked : false;
 
         const dados = {
@@ -65,8 +62,6 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
             data: form.data.value,
             registrado_por: form.registrado_por.value.trim(),
             recusou_responder: recusouResponder,
-            
-            // Se recusou responder, salva como null para não prejudicar as médias
             q1: recusouResponder ? null : Number(form.q1.value),
             q2: recusouResponder ? null : Number(form.q2.value),
             q3: recusouResponder ? null : Number(form.q3.value),
@@ -74,10 +69,7 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
             classificacao: recusouResponder ? null : calcularClassificacao(form.q1.value, form.q2.value, form.q3.value)
         };
 
-        // 3. Inserção no Supabase
-        const { error } = await supabaseClient
-            .from("avaliacoes")
-            .insert([dados]);
+        const { error } = await supabaseClient.from("avaliacoes").insert([dados]);
 
         if (error) {
             mostrarMensagem("Erro ao salvar: " + error.message, "erro");
@@ -87,7 +79,6 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
         mostrarMensagem("Avaliação salva com sucesso!", "sucesso");
         form.reset();
         
-        // Reativa os campos caso a OS anterior tenha sido recusada
         const botoesNota = document.querySelectorAll('input[type="radio"]');
         const campoComentario = document.getElementById('comentario');
         
@@ -99,6 +90,11 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
             campoComentario.disabled = false;
         }
 
+        // LIMPEZA AUTOMÁTICA APÓS 4 SEGUNDOS
+        setTimeout(() => {
+            limparMensagem();
+        }, 4000);
+
     } catch (err) {
         console.error(err);
         mostrarMensagem("Erro inesperado.", "erro");
@@ -109,19 +105,15 @@ document.getElementById("form-avaliacao").addEventListener("submit", async funct
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. Lógica para setar a data atual
     const campoData = document.getElementById("data");
-
     if (campoData && !campoData.value) {
         const hoje = new Date();
         const ano = hoje.getFullYear();
         const mes = String(hoje.getMonth() + 1).padStart(2, "0");
         const dia = String(hoje.getDate()).padStart(2, "0");
-
         campoData.value = `${ano}-${mes}-${dia}`;
     }
 
-    // 2. Lógica para o Checkbox "Recusou a responder" com Radio Buttons
     const checkboxRecusou = document.getElementById('recusou_responder');
     const botoesNota = document.querySelectorAll('input[type="radio"]');
     const campoComentario = document.getElementById('comentario');
@@ -129,8 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (checkboxRecusou) {
         checkboxRecusou.addEventListener('change', function(e) {
             const isChecked = e.target.checked;
-            
-            // Habilita/Desabilita os radios e tira o required
             botoesNota.forEach(radio => {
                 radio.disabled = isChecked;
                 if (isChecked) {
@@ -140,8 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     radio.setAttribute('required', 'required');
                 }
             });
-
-            // Habilita/Desabilita e limpa o comentário
             if (campoComentario) {
                 campoComentario.disabled = isChecked;
                 if (isChecked) {
@@ -151,47 +139,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Lógica para o Autocomplete do campo Órgão
     const datalistOrgaos = document.getElementById('lista-orgaos');
-    // Lista de órgãos atualizada conforme GETS
     const listaDeOrgaos = [
-        "CREDESH",
-        "DGC",
-        "DIRQS",
-        "DIVGP",
-        "HO-UFU",
-        "STCOR",
-        "STEC",
-        "UACE",
-        "UADCP",
-        "UAPAT",
-        "UBCME",
-        "UCA",
-        "UCAP",
-        "UCIR",
-        "UCM",
-        "UDI",
-        "UFCD",
-        "UGPESQ",
-        "UHH",
-        "ULAC",
-        "UMUL",
-        "UNUT",
-        "UONC",
-        "UPDR",
-        "UREAB",
-        "URES",
-        "USCV",
-        "USD",
-        "USME",
-        "USNE",
-        "USOST",
-        "USUR",
-        "UTIAD",
-        "UTINEO",
-        "UTO",
-        "UUE",
-        "UVS"
+        "CREDESH","DGC","DIRQS","DIVGP","HO-UFU","STCOR","STEC","UACE",
+        "UADCP","UAPAT","UBCME","UCA","UCAP","UCIR","UCM","UDI","UFCD",
+        "UGPESQ","UHH","ULAC","UMUL","UNUT","UONC","UPDR","UREAB","URES",
+        "USCV","USD","USME","USNE","USOST","USUR","UTIAD","UTINEO","UTO","UUE","UVS"
     ];
 
     if (datalistOrgaos) {
